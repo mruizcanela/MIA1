@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expediente MOVE — el metaanálisis paso a paso</title>
+<style>
+:root{--rojo:#C00000;--gris:#595959;--linea:#D9D9D9;--fondo:#F7F7F7;--ok:#1F6F3D;--amb:#8a5a00}
+*{box-sizing:border-box}
+body{margin:0;font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;color:#222;background:#fff;line-height:1.45}
+.wrap{max-width:940px;margin:0 auto;padding:16px 20px 60px}
+h1{font-size:24px;margin:0 0 2px}
+h2{font-size:20px;margin:0 0 4px}
+h3{font-size:16px;margin:18px 0 6px}
+.barra{height:3px;background:var(--rojo);width:100%;margin:0 0 14px}
+header .sub{color:var(--gris);font-size:14px;margin-bottom:10px}
+.pasos{display:flex;gap:4px;margin:10px 0 18px;flex-wrap:wrap}
+.paso{flex:1 1 0;min-width:96px;border:1px solid var(--linea);border-bottom:3px solid var(--linea);padding:5px 7px;font-size:11.5px;color:var(--gris);background:#fff}
+.paso b{display:block;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase}
+.paso.hecho{border-bottom-color:#9c9c9c;background:var(--fondo)}
+.paso.actual{border-bottom-color:var(--rojo);color:#222;font-weight:600}
+.caja{border:1px solid var(--linea);padding:12px 14px;margin:12px 0;background:#fff}
+.caja.gris{background:var(--fondo)}
+.enunciado{border-left:3px solid var(--rojo);padding:2px 0 2px 12px;margin:10px 0 16px}
+.enunciado p{margin:6px 0}
+.op{display:block;border:1px solid var(--linea);padding:10px 12px;margin:7px 0;cursor:pointer;background:#fff}
+.op:hover{background:var(--fondo)}
+.op input{margin-right:8px}
+.op.sel{border-color:var(--rojo);background:#fdf5f5}
+.op .et{font-weight:600}
+.op .ex{display:block;color:var(--gris);font-size:13.5px;margin-top:3px;margin-left:20px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:8px 0}
+th,td{border:1px solid var(--linea);padding:4px 7px;text-align:right}
+th{background:var(--fondo);text-align:center}
+td.l,th.l{text-align:left}
+td.fuera{color:#aaa}
+button{font-family:inherit;font-size:15px;padding:8px 18px;border:1px solid var(--rojo);background:var(--rojo);color:#fff;cursor:pointer}
+button:disabled{background:#bbb;border-color:#bbb;cursor:not-allowed}
+button.sec{background:#fff;color:var(--rojo)}
+select{font-family:inherit;font-size:14px;padding:4px 6px;border:1px solid var(--linea)}
+.crit{display:grid;grid-template-columns:1fr;gap:8px;margin:8px 0}
+.crit label{font-size:14px}
+.crit label b{display:block;font-weight:600;margin-bottom:2px}
+.contador{font-size:15px;padding:8px 12px;background:var(--fondo);border:1px solid var(--linea);margin:10px 0}
+.nota{font-size:13px;color:var(--gris)}
+.res{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.res div{border:1px solid var(--linea);padding:7px 12px;font-size:14px;min-width:120px}
+.res div b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--gris)}
+.prof{border:1px solid #d9b779;background:#fdf6e6;padding:9px 12px;margin:10px 0;font-size:13.5px}
+.ver{border:1px solid var(--linea);border-left:4px solid var(--linea);padding:9px 12px;margin:9px 0}
+.ver.b{border-left-color:var(--ok)}
+.ver.r{border-left-color:#8a5a00}
+.ver.m{border-left-color:var(--rojo)}
+.ver .t{font-weight:600}
+.ver .q{font-size:13.5px;color:#333;margin-top:3px}
+.ver .cita{font-size:12.5px;color:var(--gris);margin-top:3px}
+footer{border-top:1px solid var(--linea);margin-top:30px;padding-top:10px;font-size:13px;color:var(--gris);display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+code{background:var(--fondo);padding:1px 5px;font-size:13.5px}
+.hide{display:none}
+svg{max-width:100%;height:auto}
+textarea{width:100%;height:280px;font-family:Consolas,monospace;font-size:12px;border:1px solid var(--linea);padding:8px}
+.bandera{font-size:12px;color:var(--gris);border-top:1px dotted var(--linea);margin-top:8px;padding-top:5px}
+@media print{button,.pasos,footer,.noimp{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Expediente MOVE</h1>
+  <div class="barra"></div>
+  <div class="sub">Movilización muy precoz tras el ictus isquémico. Eres el metodólogo de la revisión: siete decisiones, una por sala. Nadie te dirá si aciertas hasta el informe final.</div>
+</header>
+
+<div class="pasos" id="pasos"></div>
+<div id="app"></div>
+
+<footer>
+  <div>Código de expediente: <code id="codigo">MOVE-·······</code></div>
+  <div class="noimp">
+    <label style="cursor:pointer"><input type="checkbox" id="swProf"> modo profesor</label>
+    &nbsp;&nbsp;<a href="#" id="reiniciar" style="color:var(--rojo)">volver a empezar</a>
+  </div>
+</footer>
+</div>
+
+<script>
+/* ============================ DATOS (ficticios) ============================ */
+const BANCO = [
+ {id:"alcazar",  et:"Alcázar 2011",     dis:"ECA",     ini:"<24h", des:"mRS3m",  e1:49, n1:190, e0:80, n0:190, int:"alta",     cl:false, edad:68, alto:true,  rb:"bajo"},
+ {id:"petersen", et:"Petersen 2012",    dis:"ECA",     ini:"<24h", des:"mRS3m",  e1:107,n1:225, e0:99, n0:225, int:"moderada", cl:false, edad:72, alto:false, rb:"bajo"},
+ {id:"brenner",  et:"Brenner 2013",     dis:"ECA",     ini:"<24h", des:"mRS3m",  e1:48, n1:150, e0:69, n0:150, int:"alta",     cl:false, edad:66, alto:true,  rb:"algunas dudas"},
+ {id:"duarte",   et:"Duarte 2014",      dis:"ECA",     ini:"<24h", des:"mRS3m",  e1:66, n1:140, e0:67, n0:140, int:"moderada", cl:false, edad:74, alto:false, rb:"bajo"},
+ {id:"nordmark", et:"Nordmark 2015",    dis:"ECA",     ini:"<24h", des:"mRS3m",  e1:84, n1:330, e0:132,n0:330, int:"alta",     cl:false, edad:69, alto:false, rb:"bajo"},
+ {id:"okonkwo",  et:"Okonkwo 2016",     dis:"ECA",     ini:"<24h", des:"mRS3m",  e1:36, n1:125, e0:62, n0:125, int:"alta",     cl:false, edad:64, alto:false, rb:"algunas dudas"},
+ {id:"haruna",   et:"Haruna 2017",      dis:"ECA",     ini:"<24h", des:"mRS3m",  e1:140,n1:380, e0:133,n0:380, int:"moderada", cl:true,  edad:71, alto:false, rb:"algunas dudas"},
+ {id:"vargas",   et:"Vargas 2018",      dis:"ECA",     ini:"<24h", des:"mRS3m",  e1:70, n1:255, e0:97, n0:255, int:"alta",     cl:false, edad:67, alto:true,  rb:"bajo"},
+ {id:"mendel",   et:"Mendel 2019",      dis:"ECA",     ini:"<24h", des:"mRS3m",  e1:70, n1:185, e0:76, n0:185, int:"moderada", cl:false, edad:73, alto:true,  rb:"bajo"},
+ {id:"lindqvist",et:"Lindqvist 2020",   dis:"ECA",     ini:"<24h", des:"mRS3m",  e1:114,n1:480, e0:173,n0:480, int:"alta",     cl:false, edad:70, alto:true,  rb:"bajo"},
+ {id:"move",     et:"MOVE-TRIAL 2021",  dis:"ECA",     ini:"<24h", des:"mRS3m",  e1:597,n1:1500,e0:585,n0:1500,int:"moderada", cl:false, edad:71, alto:true,  rb:"bajo"},
+ {id:"sorensen", et:"Sørensen 2022",    dis:"ECA",     ini:"<24h", des:"mRS3m",  e1:118,n1:290, e0:107,n0:290, int:"moderada", cl:false, edad:75, alto:false, rb:"bajo"},
+ /* rehabilitación tardía (> 7 días) */
+ {id:"kaminski", et:"Kaminski 2009",    dis:"ECA",     ini:">7d",  des:"Barthel",e1:34, n1:200, e0:30, n0:200, int:"—",        cl:false, edad:70, alto:false, rb:"algunas dudas"},
+ {id:"ribeiro",  et:"Ribeiro 2014",     dis:"ECA",     ini:">7d",  des:"mRS6m",  e1:22, n1:180, e0:48, n0:180, int:"—",        cl:false, edad:66, alto:false, rb:"alto"},
+ {id:"fontaine", et:"Fontaine 2016",    dis:"ECA",     ini:">7d",  des:"Barthel",e1:95, n1:200, e0:80, n0:200, int:"—",        cl:false, edad:77, alto:false, rb:"alto"},
+ {id:"osei",     et:"Osei 2019",        dis:"ECA",     ini:">7d",  des:"mRS6m",  e1:41, n1:300, e0:72, n0:300, int:"—",        cl:false, edad:69, alto:false, rb:"algunas dudas"},
+ /* fuera por diseño o por desenlace */
+ {id:"nordic",   et:"Registro NORDIC 2018",dis:"cohorte",ini:"<24h",des:"mRS3m", e1:210,n1:1400,e0:340,n0:1400,int:"—",        cl:false, edad:73, alto:false, rb:"alto"},
+ {id:"bhatt",    et:"Bhatt 2020",       dis:"ECA",     ini:"<24h", des:"muerte", e1:62, n1:700, e0:70, n0:700, int:"—",        cl:false, edad:72, alto:false, rb:"bajo"},
+ {id:"serrano",  et:"Serrano 2021",     dis:"cohorte", ini:"<24h", des:"mRS6m",  e1:88, n1:520, e0:120,n0:520, int:"—",        cl:false, edad:74, alto:false, rb:"alto"}
+];
+const DE_HARUNA = 1.62;   // efecto de diseño: 12 conglomerados de ~63 pacientes, CCI 0,01
+
+/* ============================ ESTADÍSTICA ============================ */
+function lgamma(x){const g=[676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+ if(x<0.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lgamma(1-x);
+ x-=1;let a=0.99999999999980993,t=x+7.5;for(let i=0;i<8;i++)a+=g[i]/(x+i+1);
+ return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a);}
+function gammap(s,x){ // gamma incompleta regularizada inferior
+ if(x<=0)return 0;
+ if(x<s+1){let ap=s,sum=1/s,del=sum;for(let n=1;n<200;n++){ap++;del*=x/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*1e-12)break;}
+  return sum*Math.exp(-x+s*Math.log(x)-lgamma(s));}
+ let b=x+1-s,c=1e30,d=1/b,h=d;
+ for(let i=1;i<200;i++){const an=-i*(i-s);b+=2;d=an*d+b;if(Math.abs(d)<1e-30)d=1e-30;c=b+an/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<1e-12)break;}
+ return 1-Math.exp(-x+s*Math.log(x)-lgamma(s))*h;}
+const chi2sf=(x,df)=>1-gammap(df/2,x/2);
+function betacf(a,b,x){let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;
+ if(Math.abs(d)<1e-30)d=1e-30;d=1/d;let h=d;
+ for(let m=1;m<200;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));
+  d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;h*=d*c;
+  aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;
+  const del=d*c;h*=del;if(Math.abs(del-1)<1e-12)break;}
+ return h;}
+function ibeta(a,b,x){if(x<=0)return 0;if(x>=1)return 1;
+ const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));
+ return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+const tsf=(t,df)=>0.5*ibeta(df/2,0.5,df/(df+t*t));            // cola superior
+const tp2=(t,df)=>2*tsf(Math.abs(t),df);                       // p bilateral
+function tinv975(df){let lo=0,hi=200;for(let i=0;i<100;i++){const m=(lo+hi)/2;if(tsf(m,df)>0.025)lo=m;else hi=m;}return (lo+hi)/2;}
+
+function efecto(s,meas){
+ const de=(s.cl && ESTADO.d3==="C")?DE_HARUNA:1;
+ const a=s.e1/de,n1=s.n1/de,c=s.e0/de,n0=s.n0/de,b=n1-a,d=n0-c;
+ if(meas==="RD")return{te:a/n1-c/n0,se:Math.sqrt(a*b/(n1**3)+c*d/(n0**3))};
+ if(meas==="OR")return{te:Math.log(a*d/(b*c)),se:Math.sqrt(1/a+1/b+1/c+1/d)};
+ return{te:Math.log((a/n1)/(c/n0)),se:Math.sqrt(1/a-1/n1+1/c-1/n0)};
+}
+function meta(rows,meas){
+ const r=rows.map(s=>efecto(s,meas)),k=r.length;
+ const w=r.map(x=>1/(x.se*x.se)),sw=w.reduce((a,b)=>a+b,0);
+ const F=r.reduce((a,x,i)=>a+w[i]*x.te,0)/sw, seF=Math.sqrt(1/sw);
+ const Q=r.reduce((a,x,i)=>a+w[i]*(x.te-F)**2,0), df=k-1;
+ const C=sw-w.reduce((a,x)=>a+x*x,0)/sw;
+ const tau2=Math.max(0,(Q-df)/C), I2=Math.max(0,(Q-df)/Q)*100;
+ const w2=r.map(x=>1/(x.se*x.se+tau2)), sw2=w2.reduce((a,b)=>a+b,0);
+ const R=r.reduce((a,x,i)=>a+w2[i]*x.te,0)/sw2, seR=Math.sqrt(1/sw2);
+ const tq=k>2?tinv975(k-2):3.18, half=tq*Math.sqrt(tau2+seR*seR);
+ return {k,df,r,meas,Q,I2,tau2,tau:Math.sqrt(tau2),pQ:chi2sf(Q,df),
+   F,seF,ciF:[F-1.96*seF,F+1.96*seF],R,seR,ciR:[R-1.96*seR,R+1.96*seR],
+   IP:[R-half,R+half],wF:w.map(x=>100*x/sw),wR:w2.map(x=>100*x/sw2)};
+}
+function egger(rows,meas){
+ const r=rows.map(s=>efecto(s,meas)),k=r.length;
+ const y=r.map(x=>x.te/x.se), x=r.map(x=>1/x.se);
+ const mx=x.reduce((a,b)=>a+b,0)/k, my=y.reduce((a,b)=>a+b,0)/k;
+ let sxy=0,sxx=0;for(let i=0;i<k;i++){sxy+=(x[i]-mx)*(y[i]-my);sxx+=(x[i]-mx)**2;}
+ const b1=sxy/sxx, b0=my-b1*mx;
+ let s2=0;for(let i=0;i<k;i++)s2+=(y[i]-b0-b1*x[i])**2; s2/=(k-2);
+ const seb0=Math.sqrt(s2*(1/k+mx*mx/sxx)), t=b0/seb0;
+ return {b0,t,df:k-2,p:tp2(t,k-2)};
+}
+function subgrupos(rows,meas,f){
+ const gs={};rows.forEach(s=>{const g=f(s);(gs[g]=gs[g]||[]).push(s);});
+ const out=Object.keys(gs).filter(g=>gs[g].length>=2).map(g=>({g,n:gs[g].length,m:meta(gs[g],meas)}));
+ if(out.length<2)return{grupos:out,Qb:NaN,p:NaN};
+ const w=out.map(o=>1/(o.m.seR*o.m.seR)),sw=w.reduce((a,b)=>a+b,0);
+ const mu=out.reduce((a,o,i)=>a+w[i]*o.m.R,0)/sw;
+ const Qb=out.reduce((a,o,i)=>a+w[i]*(o.m.R-mu)**2,0);
+ return {grupos:out,Qb,p:chi2sf(Qb,out.length-1)};
+}
+/* presentación de la medida */
+const MEAS={RR:{n:"RR",log:true,nulo:1,largo:"riesgo relativo"},
+            OR:{n:"OR",log:true,nulo:1,largo:"odds ratio"},
+            RD:{n:"DR",log:false,nulo:0,largo:"diferencia de riesgos"}};
+const measActual=()=>({A:"RD",B:"RR",C:"OR",D:"RD"})[ESTADO.d2]||"RR";
+function fx(v,meas){const M=MEAS[meas];const t=M.log?Math.exp(v).toFixed(2):(v*100).toFixed(1)+" %";return t.replace(".",",");}
+function fci(ci,meas){return fx(ci[0],meas)+" a "+fx(ci[1],meas);}
+
+/* ============================ ESTADO ============================ */
+const CRIT_DEF={dis:"eca",ini:"24",des:"mrs3"};
+let ESTADO={sala:0,crit:{...CRIT_DEF},d1:null,d2:null,d3:null,d4:null,d5:null,d6:null,d7:null,prof:false};
+function guardar(){try{localStorage.setItem("moveV2",JSON.stringify(ESTADO));}catch(e){}}
+function cargar(){try{const s=localStorage.getItem("moveV2");if(s)ESTADO={...ESTADO,...JSON.parse(s)};}catch(e){}}
+
+function incluidos(){
+ const c=ESTADO.crit;
+ return BANCO.filter(s=>{
+  if(c.dis==="eca"&&s.dis!=="ECA")return false;
+  if(c.ini==="24"&&s.ini!=="<24h")return false;
+  if(c.des==="mrs3"&&s.des!=="mRS3m")return false;
+  if(c.des==="func"&&s.des==="muerte")return false;
+  return true;});
+}
+function conjuntoFinal(){
+ let rows=incluidos();
+ if(ESTADO.d3==="D")rows=rows.filter(s=>!s.cl);
+ return rows;
+}
+const modelo=()=>(ESTADO.d4==="A")?"fijo":"aleatorio";
+function filasAnalisis(){
+ let rows=conjuntoFinal();
+ if(ESTADO.d4==="D"){ // excluir discordantes hasta bajar I²
+   const meas=measActual();let cur=rows.slice();
+   for(let it=0;it<6;it++){const m=meta(cur,meas);if(m.I2<50)break;
+     let peor=0,dmax=-1;m.r.forEach((x,i)=>{const d=Math.abs(x.te-m.R);if(d>dmax){dmax=d;peor=i;}});
+     cur=cur.filter((_,i)=>i!==peor);}
+   rows=cur;}
+ return rows;
+}
+
+/* ============================ GRÁFICOS ============================ */
+function forest(rows,m,opts={}){
+ const meas=m.meas,M=MEAS[meas],k=rows.length,mod=opts.model||modelo();
+ const W=900,fila=20,top=42,H=top+k*fila+(opts.ip?92:70);
+ const x0=440,x1=790;
+ let lo=Math.min(...m.r.map((x,i)=>x.te-1.96*x.se),m.ciR[0],opts.ip?m.IP[0]:m.ciR[0]);
+ let hi=Math.max(...m.r.map((x,i)=>x.te+1.96*x.se),m.ciR[1],opts.ip?m.IP[1]:m.ciR[1]);
+ const pad=(hi-lo)*0.08;lo-=pad;hi+=pad;
+ const X=v=>x0+(v-lo)/(hi-lo)*(x1-x0);
+ const ticks=M.log?[0.4,0.5,0.6,0.75,1,1.25,1.5,2].map(t=>({v:Math.log(t),l:String(t).replace(".",",")}))
+                  :[-0.2,-0.15,-0.1,-0.05,0,0.05,0.1].map(t=>({v:t,l:(t*100)+" %"}));
+ let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Calibri,Carlito,Arial" font-size="12.5">`;
+ s+=`<text x="0" y="16" font-weight="bold">Estudio</text><text x="345" y="16" font-weight="bold" text-anchor="end">${M.n} (IC 95 %)</text>`;
+ s+=`<text x="415" y="16" font-weight="bold" text-anchor="end">Peso</text>`;
+ s+=`<line x1="${X(M.log?0:0)}" y1="${top-10}" x2="${X(0)}" y2="${top+k*fila+6}" stroke="#777"/>`;
+ const pesos=(mod==="fijo")?m.wF:m.wR;
+ rows.forEach((st,i)=>{
+  const y=top+i*fila+8,e=m.r[i];
+  const lo95=X(e.te-1.96*e.se),hi95=X(e.te+1.96*e.se);
+  const col=(opts.color&&st.int!=="—")?(st.int==="alta"?"#C00000":"#2b5c9b"):"#333";
+  s+=`<text x="0" y="${y+4}">${st.et}${st.cl?" (cong.)":""}</text>`;
+  s+=`<text x="345" y="${y+4}" text-anchor="end">${fx(e.te,meas)} (${fci([e.te-1.96*e.se,e.te+1.96*e.se],meas)})</text>`;
+  s+=`<text x="415" y="${y+4}" text-anchor="end">${pesos[i].toFixed(1).replace(".",",")} %</text>`;
+  s+=`<line x1="${lo95}" y1="${y}" x2="${hi95}" y2="${y}" stroke="${col}"/>`;
+  const lado=Math.max(3.2,Math.min(9,Math.sqrt(pesos[i])*2.2));
+  s+=`<rect x="${X(e.te)-lado/2}" y="${y-lado/2}" width="${lado}" height="${lado}" fill="${col}"/>`;
+ });
+ const yd=top+k*fila+16,est=mod==="fijo"?m.F:m.R,ci=mod==="fijo"?m.ciF:m.ciR;
+ s+=`<polygon points="${X(ci[0])},${yd} ${X(est)},${yd-6} ${X(ci[1])},${yd} ${X(est)},${yd+6}" fill="#C00000"/>`;
+ s+=`<text x="0" y="${yd+4}" font-weight="bold">Global (efectos ${mod==="fijo"?"fijos":"aleatorios"})</text>`;
+ s+=`<text x="415" y="${yd+4}" text-anchor="end" font-weight="bold">${fx(est,meas)} (${fci(ci,meas)})</text>`;
+ if(opts.ip){s+=`<line x1="${X(m.IP[0])}" y1="${yd+18}" x2="${X(m.IP[1])}" y2="${yd+18}" stroke="#C00000" stroke-dasharray="4 3"/>`;
+  s+=`<text x="0" y="${yd+22}">Intervalo de predicción 95 %</text><text x="415" y="${yd+22}" text-anchor="end">${fci(m.IP,meas)}</text>`;}
+ const ye=top+k*fila+(opts.ip?42:26);
+ s+=`<line x1="${x0}" y1="${ye}" x2="${x1}" y2="${ye}" stroke="#777"/>`;
+ ticks.forEach(t=>{if(t.v<lo||t.v>hi)return;s+=`<line x1="${X(t.v)}" y1="${ye}" x2="${X(t.v)}" y2="${ye+4}" stroke="#777"/><text x="${X(t.v)}" y="${ye+16}" text-anchor="middle">${t.l}</text>`;});
+ s+=`<text x="${X(0)-10}" y="${ye+30}" text-anchor="end" fill="#595959">favorece la movilización precoz</text>`;
+ s+=`<text x="${X(0)+10}" y="${ye+30}" fill="#595959">favorece la habitual</text>`;
+ return s+"</svg>";
+}
+function funnel(rows,m,color){
+ const meas=m.meas,W=560,H=380,l=70,r=20,t=20,b=44;
+ const ses=m.r.map(x=>x.se),semax=Math.max(...ses)*1.08;
+ const c=m.R,lo=c-2.6*semax,hi=c+2.6*semax;
+ const X=v=>l+(v-lo)/(hi-lo)*(W-l-r), Y=s=>t+(s/semax)*(H-t-b);
+ let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Calibri,Carlito,Arial" font-size="12">`;
+ s+=`<polygon points="${X(c)},${Y(0)} ${X(c-1.96*semax)},${Y(semax)} ${X(c+1.96*semax)},${Y(semax)}" fill="#f2f2f2" stroke="#bbb" stroke-dasharray="4 3"/>`;
+ s+=`<line x1="${X(c)}" y1="${Y(0)}" x2="${X(c)}" y2="${Y(semax)}" stroke="#999"/>`;
+ rows.forEach((st,i)=>{const col=color?(st.int==="alta"?"#C00000":st.int==="moderada"?"#2b5c9b":"#777"):"#333";
+  s+=`<circle cx="${X(m.r[i].te)}" cy="${Y(m.r[i].se)}" r="4.5" fill="${col}" fill-opacity=".8"/>`;});
+ s+=`<line x1="${l}" y1="${H-b}" x2="${W-r}" y2="${H-b}" stroke="#777"/><line x1="${l}" y1="${t}" x2="${l}" y2="${H-b}" stroke="#777"/>`;
+ const ticks=MEAS[meas].log?[0.4,0.5,0.6,0.8,1,1.25,1.6,2].map(v=>({v:Math.log(v),l:String(v).replace(".",",")})):[-0.25,-0.2,-0.15,-0.1,-0.05,0,0.05,0.1].map(v=>({v,l:(v*100)+" %"}));
+ ticks.forEach(k=>{if(k.v<lo||k.v>hi)return;s+=`<line x1="${X(k.v)}" y1="${H-b}" x2="${X(k.v)}" y2="${H-b+4}" stroke="#777"/><text x="${X(k.v)}" y="${H-b+17}" text-anchor="middle">${k.l}</text>`;});
+ [0,semax/2,semax].forEach(v=>{s+=`<line x1="${l-4}" y1="${Y(v)}" x2="${l}" y2="${Y(v)}" stroke="#777"/><text x="${l-7}" y="${Y(v)+4}" text-anchor="end">${v.toFixed(2).replace(".",",")}</text>`;});
+ s+=`<text x="${(l+W-r)/2}" y="${H-8}" text-anchor="middle" fill="#595959">${MEAS[meas].n} de cada ensayo</text>`;
+ s+=`<text transform="translate(16,${(t+H-b)/2}) rotate(-90)" text-anchor="middle" fill="#595959">error estándar</text>`;
+ if(color)s+=`<circle cx="${W-150}" cy="30" r="4.5" fill="#C00000"/><text x="${W-140}" y="34">intensidad alta</text><circle cx="${W-150}" cy="48" r="4.5" fill="#2b5c9b"/><text x="${W-140}" y="52">intensidad moderada</text>`;
+ return s+"</svg>";
+}
+
+/* ============================ SALAS ============================ */
+const SALAS=[
+ {n:"Sala 1",t:"Criterios de elegibilidad",cap:"caps. 4 y 6"},
+ {n:"Sala 2",t:"Escala y medida del efecto",cap:"§ 8.3"},
+ {n:"Sala 3",t:"Método de combinación y unidad de análisis",cap:"§§ 8.7-8.8"},
+ {n:"Sala 4",t:"Heterogeneidad y modelo",cap:"§§ 9.3-9.6"},
+ {n:"Sala 5",t:"Análisis de subgrupos",cap:"§ 9.7"},
+ {n:"Sala 6",t:"Influencia, sensibilidad y sesgo de publicación",cap:"cap. 10"},
+ {n:"Sala 7",t:"Certeza y recomendación",cap:"cap. 12"}
+];
+function pintaPasos(){
+ document.getElementById("pasos").innerHTML=SALAS.map((s,i)=>
+  `<div class="paso ${i<ESTADO.sala?"hecho":""} ${i===ESTADO.sala?"actual":""}"><b>${s.n}</b>${s.t}</div>`).join("");
+}
+
+/* ---- textos de las opciones ---- */
+const OPC={
+ d2:[["A","Escala aditiva: combinar las diferencias de riesgo (DR)","El efecto se expresa como cuántos malos desenlaces por 100 pacientes se evitan. Valor nulo, 0."],
+     ["B","Escala multiplicativa: combinar los riesgos relativos (RR)","Cada ensayo aporta el cociente entre el riesgo del grupo movilizado y el del grupo control. Valor nulo, 1."],
+     ["C","Escala multiplicativa: combinar las odds ratio (OR)","Cada ensayo aporta el cociente de odds. Valor nulo, 1."],
+     ["D","Combinar los NNT publicados por cada ensayo","Promediar el número necesario a tratar de los doce ensayos."]],
+ d3:[["A","Mantel-Haenszel con las casillas 2×2 crudas de todos los ensayos","Ponderación de Mantel-Haenszel, tal y como cada ensayo publica su tabla."],
+     ["B","Inverso de la varianza con las casillas 2×2 crudas de todos los ensayos","Ponderación por precisión, tomando las tablas tal cual se publican."],
+     ["C","Inverso de la varianza, corrigiendo el ensayo por conglomerados por su efecto de diseño","Haruna 2017 aleatorizó 12 unidades de ictus completas, no pacientes. Se divide su tamaño efectivo por el efecto de diseño (1,62) antes de combinar."],
+     ["D","Excluir Haruna 2017 del análisis por ser un ensayo por conglomerados","Se combinan solo los ensayos con aleatorización individual."]],
+ d4:[["A","Efectos fijos: es el análisis primario y no conviene cambiarlo a la vista de los resultados","Se mantiene el supuesto de un único efecto verdadero común."],
+     ["B","Efectos aleatorios, informando además el intervalo de predicción","Se estima τ², se reponderan los ensayos y se informa el rango en que caería el efecto de un ensayo futuro."],
+     ["C","Efectos aleatorios, informando solo el intervalo de confianza del efecto medio","Se estima τ² y se reponderan los ensayos; el informe recoge el efecto medio y su IC 95 %."],
+     ["D","Excluir los ensayos más discordantes hasta que el I² baje de 50 %","Se retiran uno a uno los ensayos que más se alejan del efecto combinado."],
+     ["E","No combinar: con un I² del 80 % los ensayos no son combinables; síntesis narrativa","Se presentan los ensayos uno a uno, sin estimación global."]],
+ d5:[["A","Ningún análisis de subgrupos: con doce ensayos no hay potencia","Se informa únicamente el efecto global."],
+     ["B","Solo la intensidad del protocolo de movilización, preespecificada en PROSPERO","Alta frente a moderada: es una de las dos variables inscritas en el protocolo antes de ver los resultados."],
+     ["C","Publicación en revista de alto impacto frente al resto","Variable no preespecificada, sugerida por la lectura de los ensayos."],
+     ["D","Explorar las ocho variables disponibles y quedarse con la que salga significativa","Intensidad, edad, sexo, país, año, tamaño, riesgo de sesgo y revista, una a una."]],
+ d6:[["A","El embudo es asimétrico y Egger sale significativo: declarar sesgo de publicación y corregir el efecto con trim-and-fill","Se informa como resultado principal el efecto ajustado por los ensayos imputados."],
+     ["B","Excluir el ensayo más influyente (MOVE-TRIAL) y adoptar ese resultado como principal","El análisis de influencia identifica el ensayo con más peso; se informa el metaanálisis sin él."],
+     ["C","Análisis de sensibilidad preespecificado y no interpretar la asimetría como sesgo de publicación","Se repite el análisis cambiando modelo, medida y tratamiento del ensayo por conglomerados, y se razona la asimetría del embudo a la luz de la heterogeneidad ya explicada."],
+     ["D","Ninguno: los análisis de robustez son opcionales y el resultado principal ya está calculado","Se pasa directamente a la conclusión."]],
+ d7:[["A","Recomendar la movilización muy precoz en todos los pacientes con ictus isquémico","El efecto combinado es favorable y estadísticamente significativo."],
+     ["B","No recomendar la movilización muy precoz en ningún caso","El intervalo de predicción incluye el daño."],
+     ["C","Recomendar el protocolo de intensidad alta y desaconsejar el de intensidad moderada","El efecto medio global no describe a ningún paciente: hay dos intervenciones distintas bajo el mismo nombre."],
+     ["D","No hay evidencia suficiente para recomendar nada; se necesita más investigación","Se pide un ensayo definitivo."]]
+};
+/* consecuencia inmediata para el modo profesor */
+const PROF={
+ d2:{A:"La escala aditiva es legítima, pero aquí el riesgo basal va del 26 % al 49 % entre ensayos: la DR será más heterogénea que el RR.",
+     B:"Elección correcta: multiplicativa, valor nulo 1, se combina en logaritmos.",
+     C:"La OR es válida pero con un 40 % de malos desenlaces se aleja del nulo respecto al RR; se leerá como si fuera un riesgo relativo.",
+     D:"Error grave: el NNT es el inverso de la DR y no se promedia entre estudios (§ 8.3)."},
+ d3:{A:"Error de unidad de análisis: Haruna pesa como si hubiera aleatorizado 760 pacientes independientes.",
+     B:"Mismo error de unidad de análisis; el método de ponderación no lo arregla.",
+     C:"Correcto: el peso de Haruna cae del 8,4 % al 5,4 %.",
+     D:"Se pierde un ensayo entero pudiendo corregirlo; aceptable, pero no es la solución preferida."},
+ d4:{A:"Con I² del 80 % el IC de efectos fijos es falsamente estrecho.",
+     B:"Correcto: modelo aleatorio e intervalo de predicción.",
+     C:"Modelo correcto, informe incompleto: sin IP el lector no ve la dispersión real.",
+     D:"Excluir por discordancia es dejar que el resultado elija los datos.",
+     E:"La respuesta a la heterogeneidad es explicarla, no renunciar (§ 9.8)."},
+ d5:{A:"Se pierde la única variable que explica la heterogeneidad.",
+     B:"Correcto: variable preespecificada, entre ensayos, con hipótesis previa.",
+     C:"Falso positivo clásico: la revista no es una característica de la intervención.",
+     D:"Dragado: con ocho comparaciones la probabilidad de un falso positivo pasa del 34 %."},
+ d6:{A:"La asimetría del embudo aquí procede de los dos protocolos, no de estudios no publicados.",
+     B:"Excluir el ensayo grande porque molesta no es un análisis de influencia, es un sesgo.",
+     C:"Correcto: sensibilidad preespecificada y prudencia con el embudo.",
+     D:"Sin análisis de robustez no se puede saber si el resultado depende de una decisión concreta."},
+ d7:{A:"Recomienda a todos una media que no describe a nadie.",
+     B:"Desaconseja también el protocolo que sí funciona.",
+     C:"Correcto, si el informe lo sostiene.",
+     D:"Ya hay doce ensayos y 4 355 pacientes; el problema no es la cantidad."}
+};
+
+function render(){
+ pintaPasos();guardar();actualizaCodigo();
+ const app=document.getElementById("app");
+ app.innerHTML=[sala1,sala2,sala3,sala4,sala5,sala6,sala7][ESTADO.sala]();
+ app.querySelectorAll("[data-op]").forEach(el=>el.addEventListener("click",()=>{
+   const campo=el.dataset.campo;ESTADO[campo]=el.dataset.op;render();}));
+ const b=app.querySelector("#avanzar");
+ if(b)b.addEventListener("click",()=>{ESTADO.sala++;window.scrollTo(0,0);render();});
+ app.querySelectorAll("select[data-crit]").forEach(s=>s.addEventListener("change",()=>{
+   ESTADO.crit[s.dataset.crit]=s.value;render();}));
+ const cp=app.querySelector("#copiar");
+ if(cp)cp.addEventListener("click",()=>{const t=document.getElementById("informe");t.select();
+   try{document.execCommand("copy");cp.textContent="copiado";}catch(e){}});
+ const im=app.querySelector("#imprimir");if(im)im.addEventListener("click",()=>window.print());
+ const rr=app.querySelector("#reintentar");if(rr)rr.addEventListener("click",reset);
+}
+function opciones(campo){
+ return OPC[campo].map(([k,tit,ex])=>
+  `<label class="op ${ESTADO[campo]===k?"sel":""}" data-op="${k}" data-campo="${campo}">
+    <input type="radio" ${ESTADO[campo]===k?"checked":""}> <span class="et">${tit}</span>
+    <span class="ex">${ex}</span></label>`).join("");
+}
+function pie(campo,texto){
+ const listo=ESTADO[campo]!==null;
+ let s="";
+ if(ESTADO.prof&&listo){
+  let msg;
+  if(campo==="d1"){const inc=incluidos();
+   msg=(inc.length===12&&inc.every(x=>x.dis==="ECA"&&x.ini==="<24h"&&x.des==="mRS3m"))
+     ?"Criterios correctos: los 12 ensayos del núcleo."
+     :"Criterios demasiado amplios: entran "+inc.length+" estudios, con intervenciones, diseños o desenlaces que no responden a la pregunta.";
+  } else msg=(PROF[campo]||{})[ESTADO[campo]]||"";
+  if(msg)s+=`<div class="prof"><b>Modo profesor.</b> ${msg}</div>`;
+ }
+ s+=`<p><button id="avanzar" ${listo?"":"disabled"}>${texto||"Sellar la decisión y continuar"}</button>
+     <span class="nota" style="margin-left:10px">La decisión queda sellada en el expediente. No verás sus consecuencias en el resultado hasta la sala 7.</span></p>`;
+ return s;
+}
+function cab(i,extra){
+ return `<h2>${SALAS[i].n}. ${SALAS[i].t}</h2><div class="barra"></div>
+   <div class="nota">Paso ${i+1} de 7 — apuntes, ${SALAS[i].cap}</div>${extra||""}`;
+}
+
+/* motivo por el que un estudio no cumple los criterios actuales */
+function razones(st,c){
+ const r=[];
+ if(c.dis==="eca"&&st.dis!=="ECA")r.push("diseño: es un "+(st.dis==="cohorte"?"estudio de cohortes":st.dis)+", no un ensayo aleatorizado");
+ if(c.ini==="24"&&st.ini!=="<24h")r.push("inicio: "+(st.ini===">7d"?"comienza después de 7 días, no dentro de las primeras 24 h":"no consta inicio < 24 h"));
+ if(c.des==="mrs3"&&st.des!=="mRS3m")r.push("desenlace: mide "+({mRS6m:"mRS a los 6 meses, no a los 3",Barthel:"Barthel al alta, no mRS a los 3 meses",muerte:"mortalidad a 30 días, no dependencia funcional"})[st.des]);
+ else if(c.des==="func"&&st.des==="muerte")r.push("desenlace: mide mortalidad, no dependencia funcional");
+ return r;
+}
+/* ---------- SALA 1 ---------- */
+function sala1(){
+ ESTADO.d1="X";
+ const inc=incluidos(),c=ESTADO.crit,fuera=BANCO.filter(st=>!inc.includes(st));
+ let s=cab(0,`<div class="enunciado">
+  <p><b>La pregunta.</b> En adultos con ictus isquémico agudo, ¿la movilización muy precoz (inicio antes de 24 h) frente a la movilización habitual reduce la dependencia funcional a los tres meses (mRS 3-6)?</p>
+  <p><b>Lo que decides aquí:</b> los criterios de elegibilidad. Ellos solos determinan qué estudios del banco entran en el metaanálisis. No hay nada más que elegir en esta sala: el conjunto que resulte es tu decisión, y arrastra las seis salas siguientes.</p></div>`);
+ s+=`<div class="caja gris"><div class="crit">
+  <label><b>Diseños elegibles</b><select data-crit="dis">
+    <option value="eca" ${c.dis==="eca"?"selected":""}>Solo ensayos aleatorizados</option>
+    <option value="todos" ${c.dis==="todos"?"selected":""}>Ensayos aleatorizados y estudios de cohortes</option></select></label>
+  <label><b>Momento de inicio de la movilización</b><select data-crit="ini">
+    <option value="24" ${c.ini==="24"?"selected":""}>Antes de las 24 h desde el ictus</option>
+    <option value="todos" ${c.ini==="todos"?"selected":""}>Cualquier momento (movilización precoz o rehabilitación tardía)</option></select></label>
+  <label><b>Desenlace principal</b><select data-crit="des">
+    <option value="mrs3" ${c.des==="mrs3"?"selected":""}>mRS 3-6 a los 3 meses</option>
+    <option value="func" ${c.des==="func"?"selected":""}>Cualquier medida de dependencia funcional (mRS o Barthel, a 3 o 6 meses)</option>
+    <option value="clin" ${c.des==="clin"?"selected":""}>Cualquier desenlace clínico, incluida la mortalidad</option></select></label>
+ </div>
+ <div class="contador">El banco tiene <b>19</b> estudios. Con tus criterios entran <b>${inc.length}</b> y quedan fuera <b>${fuera.length}</b>.</div></div>`;
+ s+=`<h3>Estudios incluidos (${inc.length})</h3>`;
+ if(inc.length===0)s+=`<div class="caja gris nota">Ningún estudio cumple estos criterios.</div>`;
+ else{s+=`<table><tr><th class="l">Estudio</th><th>Diseño</th><th>Inicio</th><th>Desenlace</th><th>N</th></tr>`;
+  inc.forEach(st=>{const des={mRS3m:"mRS 3-6, 3 m",mRS6m:"mRS 3-6, 6 m",Barthel:"Barthel al alta",muerte:"mortalidad 30 d"}[st.des];
+   s+=`<tr><td class="l">${st.et}${st.cl?" (conglomerados)":""}</td><td>${st.dis}</td><td>${st.ini}</td><td class="l">${des}</td><td>${st.n1+st.n0}</td></tr>`;});
+  s+="</table>";}
+ s+=`<h3>Estudios excluidos por tus criterios (${fuera.length})</h3>`;
+ if(fuera.length===0)s+=`<div class="caja gris nota">Ningún estudio del banco queda fuera.</div>`;
+ else{s+=`<table><tr><th class="l">Estudio</th><th>Diseño</th><th>Inicio</th><th>Desenlace</th><th>N</th><th class="l">Por qué queda fuera</th></tr>`;
+  fuera.forEach(st=>{const des={mRS3m:"mRS 3-6, 3 m",mRS6m:"mRS 3-6, 6 m",Barthel:"Barthel al alta",muerte:"mortalidad 30 d"}[st.des];
+   s+=`<tr class="fuera"><td class="l">${st.et}${st.cl?" (conglomerados)":""}</td><td>${st.dis}</td><td>${st.ini}</td><td class="l">${des}</td><td>${st.n1+st.n0}</td>
+    <td class="l">${razones(st,c).join("; ")}</td></tr>`;});
+  s+="</table>";}
+ s+=pie("d1","Registrar los criterios y continuar");
+ return s;
+}
+/* ---------- SALA 2 ---------- */
+function sala2(){
+ const rows=incluidos();
+ const r0=rows.reduce((a,s)=>a+s.e0,0)/rows.reduce((a,s)=>a+s.n0,0);
+ let s=cab(1,`<div class="enunciado">
+  <p><b>Lo que decides aquí:</b> en qué escala se expresa el efecto y qué medida se va a combinar. Todo lo que veas a partir de ahora estará en la medida que elijas.</p>
+  <p>Tienes ${rows.length} estudios. En los grupos control, el ${(100*r0).toFixed(0).replace(".",",")} % de los pacientes acaba con mal desenlace funcional: no es un desenlace raro.</p></div>`);
+ s+=`<div class="caja gris"><table><tr><th class="l">Estudio</th><th>Eventos / n (movilización)</th><th>Eventos / n (habitual)</th><th>Riesgo control</th></tr>`;
+ rows.forEach(st=>{s+=`<tr><td class="l">${st.et}</td><td>${st.e1} / ${st.n1}</td><td>${st.e0} / ${st.n0}</td><td>${(100*st.e0/st.n0).toFixed(0).replace(".",",")} %</td></tr>`;});
+ s+="</table></div>";
+ s+=opciones("d2")+pie("d2");
+ return s;
+}
+/* ---------- SALA 3 ---------- */
+function sala3(){
+ const meas=measActual(),rows=incluidos();
+ const m=meta(rows,meas);
+ const iH=rows.findIndex(s=>s.cl);
+ let s=cab(2,`<div class="enunciado">
+  <p><b>Lo que decides aquí:</b> cómo se ponderan los estudios y qué se hace con el ensayo que no aleatorizó pacientes.</p>
+  <p>Trabajas con ${MEAS[meas].largo} (${MEAS[meas].n}). ${iH>=0?`<b>Haruna 2017</b> aleatorizó 12 unidades de ictus completas —unos 63 pacientes cada una— y publica sus datos como si cada paciente fuera independiente. Con un coeficiente de correlación intraclase de 0,01, su efecto de diseño es 1,62.`:"Ningún ensayo de tu conjunto es por conglomerados."}</p></div>`);
+ if(iH>=0){s+=`<div class="caja gris"><b>Peso de Haruna 2017 con las casillas crudas:</b> ${m.wF[iH].toFixed(1).replace(".",",")} % del total en efectos fijos.
+  <div class="nota">Recuerda del capítulo 6: usar las casillas crudas de un diseño por conglomerados reintroduce el error de unidad de análisis.</div></div>`;}
+ s+=opciones("d3")+pie("d3");
+ return s;
+}
+/* ---------- SALA 4 ---------- */
+function sala4(){
+ const meas=measActual(),rows=conjuntoFinal(),m=meta(rows,meas);
+ let s=cab(3,`<div class="enunciado">
+  <p><b>Lo que decides aquí:</b> qué modelo se usa para combinar y qué se informa con él. Antes de decidir, mira la dispersión de los cuadrados en el forest plot y las tres medidas de heterogeneidad.</p></div>`);
+ s+=`<div class="res">
+  <div><b>Q de Cochran</b>${m.Q.toFixed(1).replace(".",",")} (gl ${m.df}); p ${m.pQ<0.001?"< 0,001":("= "+m.pQ.toFixed(3)).replace(".",",")}</div>
+  <div><b>I²</b>${m.I2.toFixed(1).replace(".",",")} %</div>
+  <div><b>τ²</b>${m.tau2.toFixed(3).replace(".",",")} &nbsp;(τ = ${m.tau.toFixed(2).replace(".",",")})</div>
+  <div><b>Efectos fijos</b>${fx(m.F,meas)} (${fci(m.ciF,meas)})</div>
+  <div><b>Efectos aleatorios</b>${fx(m.R,meas)} (${fci(m.ciR,meas)})</div>
+  <div><b>Intervalo de predicción</b>${fci(m.IP,meas)}</div></div>`;
+ s+=`<div class="caja">${forest(rows,m,{ip:false,model:"fijo"})}</div>`+`<div class="nota">Forest plot del análisis primario que traes de la sala 3, con ponderación de efectos fijos.</div>`;
+ s+=opciones("d4")+pie("d4");
+ return s;
+}
+/* ---------- SALA 5 ---------- */
+const AVISO_E=`<div class="nota" style="border:1px solid #d9b779;background:#fdf6e6;padding:7px 10px;margin:8px 0">Decidiste no combinar los ensayos. Aun así, el protocolo obliga a intentar explicar la heterogeneidad y a comprobar la robustez, así que las cifras que siguen se calculan con efectos aleatorios a título exploratorio.</div>`;
+function sala5(){
+ const meas=measActual(),rows=filasAnalisis(),m=meta(rows,meas);
+ let s=cab(4,`<div class="enunciado">
+  <p><b>Lo que decides aquí:</b> qué análisis de subgrupos se hace para intentar explicar la heterogeneidad. Solo se ejecutará el que elijas, y su resultado será el único que tendrás para redactar la recomendación.</p>
+  <p class="nota">El protocolo inscrito en PROSPERO preespecificó dos variables de subgrupo: <b>intensidad del protocolo de movilización</b> (alta o moderada) y <b>edad media del ensayo</b> (menor de 70 años o 70 o más). Las demás variables de la tabla se recogieron durante la extracción de datos.</p></div>`);
+ if(ESTADO.d4==="E")s+=AVISO_E;
+ s+=`<div class="caja gris"><table><tr><th class="l">Estudio</th><th>Intensidad</th><th>Edad media</th><th>Revista de alto impacto</th><th>Riesgo de sesgo</th></tr>`;
+ rows.forEach(st=>{s+=`<tr><td class="l">${st.et}</td><td>${st.int}</td><td>${st.edad}</td><td>${st.alto?"sí":"no"}</td><td>${st.rb}</td></tr>`;});
+ s+=`</table><div class="nota">Punto de partida: ${MEAS[meas].n} global ${fx(modelo()==="fijo"?m.F:m.R,meas)}, I² = ${m.I2.toFixed(1).replace(".",",")} %.</div></div>`;
+ s+=opciones("d5")+pie("d5");
+ return s;
+}
+/* resultado del subgrupo elegido, visible desde la sala 6 */
+function resSub(){
+ const meas=measActual(),rows=filasAnalisis();
+ if(ESTADO.d5==="B")return subgrupos(rows,meas,s=>s.int==="—"?"sin clasificar":"intensidad "+s.int);
+ if(ESTADO.d5==="C")return subgrupos(rows,meas,s=>s.alto?"revista de alto impacto":"resto de revistas");
+ if(ESTADO.d5==="D")return subgrupos(rows,meas,s=>s.alto?"revista de alto impacto":"resto de revistas");
+ return null;
+}
+/* ---------- SALA 6 ---------- */
+function sala6(){
+ const meas=measActual(),rows=filasAnalisis(),m=meta(rows,meas),eg=egger(rows,meas),sg=resSub();
+ let s=cab(5,`<div class="enunciado">
+  <p><b>Lo que decides aquí:</b> qué se hace con la robustez del resultado. Tienes delante el análisis de influencia, el embudo y la prueba de Egger.</p></div>`);
+ if(ESTADO.d4==="E")s+=AVISO_E;
+ if(sg&&sg.grupos.length>1){
+  s+=`<h3>Lo que dio tu análisis de subgrupos</h3><table><tr><th class="l">Subgrupo</th><th>k</th><th>${MEAS[meas].n} (IC 95 %)</th><th>I²</th></tr>`;
+  sg.grupos.forEach(g=>{s+=`<tr><td class="l">${g.g}</td><td>${g.n}</td><td>${fx(g.m.R,meas)} (${fci(g.m.ciR,meas)})</td><td>${g.m.I2.toFixed(0).replace(".",",")} %</td></tr>`;});
+  s+=`</table><div class="nota">Prueba de interacción: Q = ${sg.Qb.toFixed(1).replace(".",",")}; p ${sg.p<0.001?"< 0,001":("= "+sg.p.toFixed(3)).replace(".",",")}${ESTADO.d5==="D"?" — obtenido tras explorar ocho variables.":""}</div>`;
+ } else {
+  s+=`<div class="caja gris">${ESTADO.d5==="A"?"No dispones de ningún resultado por subgrupos: en la sala 5 decidiste no hacer ninguno.":"El análisis de subgrupos que elegiste no puede ejecutarse sobre el conjunto que ha quedado: alguno de los grupos se ha quedado con menos de dos estudios."}</div>`;
+ }
+ s+=`<h3>Análisis de influencia (dejando fuera un ensayo cada vez)</h3><table><tr><th class="l">Ensayo excluido</th><th>${MEAS[meas].n} global</th><th>I²</th></tr>`;
+ rows.forEach((st,i)=>{const mm=meta(rows.filter((_,j)=>j!==i),meas);
+  s+=`<tr><td class="l">${st.et}</td><td>${fx(modelo()==="fijo"?mm.F:mm.R,meas)}</td><td>${mm.I2.toFixed(0).replace(".",",")} %</td></tr>`;});
+ s+=`</table><div class="nota">Referencia con todos: ${fx(modelo()==="fijo"?m.F:m.R,meas)}, I² = ${m.I2.toFixed(0).replace(".",",")} %.</div>`;
+ s+=`<h3>Embudo y prueba de Egger</h3><div class="caja">${funnel(rows,m,ESTADO.d5==="B")}</div>`;
+ s+=`<div class="res"><div><b>Egger, intercepto</b>${eg.b0.toFixed(2).replace(".",",")}</div><div><b>t (gl ${eg.df})</b>${eg.t.toFixed(2).replace(".",",")}</div>
+   <div><b>p</b>${eg.p<0.001?"< 0,001":eg.p.toFixed(3).replace(".",",")}</div></div>`;
+ if(ESTADO.d5==="B"){
+  const alta=rows.filter(x=>x.int==="alta"),mod=rows.filter(x=>x.int==="moderada");
+  if(alta.length>2&&mod.length>2){const ea=egger(alta,meas),em=egger(mod,meas);
+   s+=`<div class="nota">Egger dentro de cada subgrupo: intensidad alta p = ${ea.p.toFixed(2).replace(".",",")}; intensidad moderada p = ${em.p.toFixed(2).replace(".",",")}.</div>`;}
+ }
+ s+=opciones("d6")+pie("d6");
+ return s;
+}
+/* ---------- SALA 7 ---------- */
+function sala7(){
+ const meas=measActual(),rows=filasAnalisis(),m=meta(rows,meas);
+ if(ESTADO.d7===null){
+  let s=cab(6,`<div class="enunciado">
+   <p><b>Lo que decides aquí:</b> la recomendación que se lleva a la guía clínica. Al sellarla se abre el informe con todo lo que has hecho.</p></div>`);
+  s+=`<div class="res"><div><b>Estudios combinados</b>${rows.length}</div>
+   <div><b>Medida y modelo</b>${MEAS[meas].n}, efectos ${modelo()==="fijo"?"fijos":"aleatorios"}</div>
+   <div><b>Resultado</b>${fx(modelo()==="fijo"?m.F:m.R,meas)} (${fci(modelo()==="fijo"?m.ciF:m.ciR,meas)})</div>
+   ${ESTADO.d4==="B"?`<div><b>Intervalo de predicción</b>${fci(m.IP,meas)}</div>`:""}</div>`;
+  s+=opciones("d7")+pie("d7","Sellar la recomendación y abrir el informe");
+  return s;
+ }
+ return informe();
+}
+
+/* ============================ VEREDICTOS ============================ */
+function veredictos(){
+ const inc=incluidos(),V=[];
+ const nucleo=inc.length===12&&inc.every(s=>s.dis==="ECA"&&s.ini==="<24h"&&s.des==="mRS3m");
+ let v1;
+ if(nucleo)v1={n:"b",t:"Criterios correctos",q:"Los tres criterios reproducen la pregunta PICO: ensayos aleatorizados, inicio antes de 24 h y mRS 3-6 a los tres meses. Entran los 12 ensayos que responden a la pregunta.",c:"Apuntes § 4.3 y § 6.1."};
+ else{
+  const falta=[];
+  if(ESTADO.crit.dis==="todos")falta.push("has admitido estudios de cohortes, en los que quien se moviliza antes es quien está mejor: la confusión por indicación entra directamente en el resultado");
+  if(ESTADO.crit.ini==="todos")falta.push("has mezclado la movilización precoz con la rehabilitación tardía, que es otra intervención distinta");
+  if(ESTADO.crit.des!=="mrs3")falta.push("has admitido desenlaces distintos del preespecificado, medidos en escalas y momentos diferentes");
+  v1={n:"m",t:"Criterios demasiado amplios",q:"Combinaste "+inc.length+" estudios porque "+falta.join("; y ")+". Los criterios de elegibilidad son la traducción operativa de la pregunta: si se ensanchan, el metaanálisis responde a una pregunta que nadie hizo.",c:"Apuntes § 4.3; Egger 2022, cap. 4."};
+ }
+ V.push(v1);
+ const V2={A:{n:"r",t:"Escala aditiva: defendible, pero no la mejor aquí",q:"La diferencia de riesgos expresa el impacto clínico y es la que da el NNT, pero depende del riesgo basal, y aquí el riesgo en los controles va del 26 % al 49 % entre ensayos. Eso añade heterogeneidad que no procede del tratamiento.",c:"Apuntes § 8.3."},
+  B:{n:"b",t:"Medida correcta",q:"El riesgo relativo es la medida multiplicativa habitual en ensayos con desenlace binario; se combina en escala logarítmica, por simetría y por normalidad.",c:"Apuntes §§ 8.3 y 8.4."},
+  C:{n:"r",t:"OR con un desenlace frecuente",q:"La OR es una medida válida, pero con un 40 % de malos desenlaces se aleja del valor nulo respecto al RR. Quien lea tu informe la interpretará como si fuera un riesgo relativo y creerá que el efecto es mayor de lo que es.",c:"Apuntes § 8.3, «RR y OR no son intercambiables»."},
+  D:{n:"m",t:"El NNT no se combina",q:"El NNT es el inverso de la diferencia de riesgos y no tiene un error estándar que permita ponderarlo; promediar NNT de varios ensayos no da el NNT del conjunto.",c:"Apuntes § 8.3."}}[ESTADO.d2];
+ V.push(V2);
+ const V3={A:{n:"m",t:"Error de unidad de análisis",q:"Mantel-Haenszel es un buen método, pero has usado las casillas crudas de un ensayo por conglomerados. Haruna aleatorizó 12 unidades de ictus, no 760 pacientes independientes: su información real es menor que la que aparenta y se lleva más peso del que le corresponde.",c:"Apuntes § 6.4 y § 8.8."},
+  B:{n:"m",t:"Error de unidad de análisis",q:"El inverso de la varianza es correcto, pero el problema no era el método de ponderación: era el denominador. Con las casillas crudas, el ensayo por conglomerados sigue pesando de más.",c:"Apuntes § 6.4 y § 8.7."},
+  C:{n:"b",t:"Unidad de análisis resuelta",q:"Al dividir el tamaño efectivo por el efecto de diseño, el peso del ensayo por conglomerados baja a lo que le corresponde y el resto del análisis no se distorsiona. El inverso de la varianza permite hacerlo; Mantel-Haenszel, que solo admite tablas 2×2 crudas, no.",c:"Apuntes § 8.8, última observación del epígrafe."},
+  D:{n:"r",t:"Solución por exclusión",q:"Excluir el ensayo evita el error, pero pierde un ensayo entero de 760 pacientes cuando bastaba con corregir su peso. Es aceptable como análisis de sensibilidad, no como análisis principal.",c:"Apuntes § 10.3."}}[ESTADO.d3];
+ V.push(V3);
+ const V4={A:{n:"m",t:"Efectos fijos con heterogeneidad grande",q:"Al mantener el modelo fijo has asumido un único efecto verdadero cuando los datos dicen lo contrario. El intervalo de confianza que has informado es falsamente estrecho y el ensayo más grande decide casi solo el resultado.",c:"Apuntes § 9.4, «¿Qué modelo elegir?»."},
+  B:{n:"b",t:"Modelo e informe correctos",q:"Efectos aleatorios ante heterogeneidad grande, e intervalo de predicción para que el lector vea dónde caería el efecto de un ensayo futuro. El IC del efecto medio y el IP responden a preguntas distintas.",c:"Apuntes §§ 9.4 y 9.6."},
+  C:{n:"r",t:"Modelo correcto, informe incompleto",q:"El modelo aleatorio es el adecuado, pero sin intervalo de predicción el lector solo ve la precisión de la media y no la dispersión de los efectos verdaderos, que es justo lo que aquí importa.",c:"Apuntes § 9.6."},
+  D:{n:"m",t:"Exclusión guiada por el resultado",q:"Retirar los ensayos que más se apartan hasta que el I² baje es dejar que la conclusión elija los datos. Además, los ensayos que excluiste eran precisamente los del protocolo intensivo: has borrado el hallazgo.",c:"Apuntes § 9.8."},
+  E:{n:"m",t:"Renunciar a combinar",q:"Un I² alto no prohíbe combinar: obliga a explicar. La heterogeneidad de este conjunto tenía una causa identificable y preespecificada; la síntesis narrativa la deja sin encontrar.",c:"Apuntes § 9.8."}}[ESTADO.d4];
+ V.push(V4);
+ const sgOK=(()=>{const x=resSub();return x&&x.grupos.length>1;})();
+ const V5={A:{n:"m",t:"Sin análisis de subgrupos",q:"Con doce ensayos la potencia es limitada, pero la variable estaba preespecificada y la heterogeneidad era enorme. Al no mirarla te has quedado con una media que no describe a ningún paciente.",c:"Apuntes § 9.7."},
+  B:sgOK?{n:"b",t:"Subgrupo preespecificado",q:"Analizaste la única variable que estaba en el protocolo y que además es una característica de la intervención, no de los pacientes. El resultado divide el conjunto en dos: el protocolo de intensidad alta y el de intensidad moderada, con I² igual a cero dentro de cada uno.",c:"Apuntes § 9.7, «Reglas para que un análisis de subgrupos sea creíble»."}
+  :{n:"r",t:"Variable bien elegida, análisis imposible",q:"Elegiste la variable correcta, pero el conjunto que llegó hasta aquí ya no permitía el análisis: alguno de los dos grupos se había quedado con menos de dos ensayos por las exclusiones de las salas anteriores. La decisión de la sala 4 te quitó el hallazgo antes de poder buscarlo.",c:"Apuntes §§ 9.7 y 9.8."},
+  C:{n:"m",t:"Subgrupo post hoc",q:"La revista donde se publica un ensayo no es una característica de la intervención ni de los pacientes, y la variable no estaba preespecificada. La diferencia que encontraste es un falso positivo que además tapa la variable que sí explicaba la heterogeneidad.",c:"Apuntes § 9.7."},
+  D:{n:"m",t:"Dragado de subgrupos",q:"Ocho comparaciones dan un 34 % de probabilidad de encontrar al menos un «significativo» aunque no exista ninguna diferencia real. Quedarse con la que sale es garantizar el falso positivo.",c:"Apuntes § 9.7."}}[ESTADO.d5];
+ V.push(V5);
+ const V6={A:{n:"m",t:"Asimetría mal atribuida",q:"El embudo es asimétrico y Egger da un valor pequeño, pero la asimetría tiene más causas que el sesgo de publicación: aquí procede de que hay dos intervenciones distintas mezcladas. Dentro de cada protocolo la asimetría desaparece. Trim-and-fill imputa ensayos que nunca existieron y «corrige» un efecto que no estaba sesgado.",c:"Apuntes §§ 10.5 a 10.7."},
+  B:{n:"m",t:"Exclusión del ensayo incómodo",q:"El análisis de influencia sirve para saber si el resultado depende de un solo estudio, no para quitarlo. Aquí, además, dejando fuera cualquier ensayo el efecto se mueve muy poco: la heterogeneidad no venía de un valor extremo sino de la estructura del conjunto.",c:"Apuntes § 10.2."},
+  C:{n:"b",t:"Robustez bien planteada",q:"Repetir el análisis cambiando las decisiones discutibles es lo que hace creíble un resultado, y con doce ensayos y la heterogeneidad ya explicada por el protocolo, la asimetría del embudo no puede leerse como sesgo de publicación.",c:"Apuntes §§ 10.3, 10.5 y 10.6."},
+  D:{n:"r",t:"Sin análisis de robustez",q:"Sin comprobarlo, no puedes saber si tu resultado depende de una decisión concreta que tomaste por el camino. No es un error de método, pero deja el informe sin respaldo.",c:"Apuntes § 10.3."}}[ESTADO.d6];
+ V.push(V6);
+ const vioSplit=ESTADO.d5==="B";
+ const V7={A:{n:"m",t:"Recomendación sobre una media",q:"El efecto combinado es favorable, pero es la media de dos intervenciones distintas: una que funciona y otra que no. Recomendarla «en general» hace que la mitad de los pacientes reciba un protocolo sin beneficio.",c:"Apuntes cap. 12; Egger 2022, cap. 22."},
+  B:{n:"m",t:"Rechazo global",q:"Descartar la intervención entera desaconseja también el protocolo de intensidad alta, que sí reduce la dependencia de forma consistente.",c:"Apuntes cap. 12."},
+  C:vioSplit?{n:"b",t:"Recomendación sostenida por el informe",q:"Has separado los dos protocolos porque tu propio análisis preespecificado lo mostró. Eso es lo que hace defendible la recomendación ante un comité.",c:"Apuntes § 9.7 y cap. 12."}
+   :{n:"r",t:"Recomendación correcta que tu informe no sostiene",q:"La conclusión es la buena, pero en tu expediente no hay ningún análisis que la respalde: no hiciste el subgrupo de intensidad, así que la diferencia entre protocolos no aparece en ninguna parte de tu trabajo. En un comité de guías te preguntarían de dónde sale, y no tendrías respuesta.",c:"Apuntes § 9.7."},
+  D:{n:"r",t:"Aplazar la decisión",q:"Doce ensayos y más de 4 000 pacientes. El problema no era la cantidad de evidencia sino su interpretación: pedir más investigación aquí es no responder a la pregunta.",c:"Apuntes cap. 12."}}[ESTADO.d7];
+ V.push(V7);
+ return V;
+}
+function grade(){
+ let n=4,bajadas=[];
+ const inc=incluidos();
+ if(ESTADO.crit.dis==="todos"){n--;bajadas.push(["Riesgo de sesgo","se incluyeron estudios observacionales, con confusión por indicación"]);}
+ else if(ESTADO.d3==="A"||ESTADO.d3==="B"){n--;bajadas.push(["Riesgo de sesgo","error de unidad de análisis en el ensayo por conglomerados"]);}
+ const sgHecho=(()=>{const x=resSub();return ESTADO.d5==="B"&&x&&x.grupos.length>1;})();
+ if(!sgHecho){n--;bajadas.push(["Inconsistencia","heterogeneidad grande sin explicar"]);}
+ else if(ESTADO.d4==="A"){n--;bajadas.push(["Inconsistencia","heterogeneidad no reconocida en el modelo"]);}
+ if(ESTADO.crit.ini==="todos"||ESTADO.crit.des!=="mrs3"){n--;bajadas.push(["Evidencia indirecta","se mezclaron intervenciones o desenlaces distintos del de la pregunta"]);}
+ if(ESTADO.d4==="D"||ESTADO.d4==="E"){n--;bajadas.push(["Imprecisión","el conjunto analizado se redujo por decisiones tomadas tras ver los resultados"]);}
+ if(ESTADO.d6==="A"){n--;bajadas.push(["Sesgo de publicación","se declaró un sesgo que los datos no sostienen y se corrigió el efecto"]);}
+ if(ESTADO.d6==="B"){n--;bajadas.push(["Sesgo de publicación","se informó como principal un análisis con un ensayo excluido a posteriori"]);}
+ n=Math.max(1,n);
+ return {n,etiqueta:["","muy baja","baja","moderada","alta"][n],bajadas};
+}
+function informe(){
+ const meas=measActual(),rows=filasAnalisis(),m=meta(rows,meas),V=veredictos(),g=grade();
+ const graves=V.filter(v=>v.n==="m").length,reservas=V.filter(v=>v.n==="r").length;
+ let s=`<h2>Informe final</h2><div class="barra"></div>`;
+ s+=`<div class="caja gris"><b>Lo que hay debajo de este caso.</b> Los doce ensayos del núcleo no evaluaban una intervención sino dos.
+  Seis aplicaron un protocolo de intensidad alta —sedestación y bipedestación repetidas, varias sesiones diarias— y reducen la dependencia de forma consistente (RR ≈ 0,65, I² = 0 %).
+  Los otros seis, incluido el megaensayo MOVE-TRIAL, aplicaron un protocolo de intensidad moderada y no encuentran beneficio (RR ≈ 1,03, I² = 0 %).
+  El efecto medio global, alrededor de 0,83, no describe a ningún paciente real: es el promedio de dos cosas distintas. Todo el caso estaba construido para que ese hallazgo apareciera o no según lo que decidieras.</div>`;
+ s+=`<h3>Tu resultado</h3><div class="res">
+  <div><b>Estudios</b>${rows.length}</div><div><b>Medida</b>${MEAS[meas].n}</div>
+  <div><b>Modelo</b>efectos ${modelo()==="fijo"?"fijos":"aleatorios"}</div>
+  <div><b>Efecto</b>${fx(modelo()==="fijo"?m.F:m.R,meas)} (${fci(modelo()==="fijo"?m.ciF:m.ciR,meas)})</div>
+  <div><b>I²</b>${m.I2.toFixed(0).replace(".",",")} %</div></div>`;
+ s+=`<h3>Las siete decisiones</h3>`;
+ V.forEach((v,i)=>{s+=`<div class="ver ${v.n}"><div class="t">${SALAS[i].n}. ${v.t}</div><div class="q">${v.q}</div><div class="cita">${v.c}</div></div>`;});
+ s+=`<h3>Certeza de la evidencia (GRADE)</h3>`;
+ s+=`<div class="caja">Punto de partida: <b>alta</b> (ensayos aleatorizados). ${g.bajadas.length?"Se baja por:":"No se baja por ningún dominio."}
+  <ul>${g.bajadas.map(b=>`<li><b>${b[0]}:</b> ${b[1]}</li>`).join("")}</ul>
+  Certeza final: <b>${g.etiqueta}</b>.</div>`;
+ if(graves===0&&reservas===0)s+=`<div class="ver b"><div class="t">Expediente cerrado sin errores.</div><div class="q">Las siete decisiones se sostienen y la recomendación se apoya en tu propio análisis. Este es el recorrido que se espera de un metodólogo.</div></div>`;
+ else if(graves===0)s+=`<div class="ver r"><div class="t">Expediente válido con reservas.</div><div class="q">No hay errores que invaliden el metaanálisis, pero ${reservas} decisión${reservas>1?"es":""} habría que defender ante un revisor. Merece la pena repetir el recorrido cambiando solo esas.</div></div>`;
+ else s+=`<div class="ver m"><div class="t">Expediente no válido: ${graves} error${graves>1?"es":""} de método.</div>
+   <div class="q">Un metaanálisis con ${graves===1?"este error":"estos errores"} no puede sostener una recomendación clínica. Vuelve al principio: sabes en qué salas fallaste, pero no cuál era la alternativa correcta.</div></div>`;
+ s+=`<h3>Expediente para entregar</h3>`;
+ const t=[];
+ t.push("EXPEDIENTE MOVE — "+codigo());
+ t.push("Pregunta: movilización muy precoz (<24 h) vs. habitual en ictus isquémico; mRS 3-6 a 3 meses.");
+ t.push("");
+ t.push("Criterios: "+({eca:"solo ECA",todos:"ECA y cohortes"})[ESTADO.crit.dis]+"; "+({"24":"inicio < 24 h",todos:"cualquier momento"})[ESTADO.crit.ini]+"; "+({mrs3:"mRS 3-6 a 3 meses",func:"cualquier medida funcional",clin:"cualquier desenlace clínico"})[ESTADO.crit.des]+" -> "+rows.length+" estudios.");
+ t.push("Medida: "+MEAS[meas].largo+". Modelo: efectos "+(modelo()==="fijo"?"fijos":"aleatorios")+".");
+ t.push("Resultado: "+fx(modelo()==="fijo"?m.F:m.R,meas)+" (IC 95 % "+fci(modelo()==="fijo"?m.ciF:m.ciR,meas)+"); I2 = "+m.I2.toFixed(0)+" %; tau2 = "+m.tau2.toFixed(3)+".");
+ if(ESTADO.d4==="B")t.push("Intervalo de predicción 95 %: "+fci(m.IP,meas)+".");
+ t.push("");
+ V.forEach((v,i)=>{t.push(SALAS[i].n+" — "+SALAS[i].t+": "+({b:"CORRECTO",r:"CON RESERVAS",m:"ERROR"})[v.n]+". "+v.t);});
+ t.push("");
+ t.push("Certeza GRADE: "+g.etiqueta+(g.bajadas.length?" (se baja por "+g.bajadas.map(b=>b[0].toLowerCase()).join(", ")+")":""));
+ t.push("Veredicto: "+(graves===0&&reservas===0?"expediente cerrado sin errores":graves===0?"válido con reservas":"no válido, "+graves+" error(es) de método"));
+ s+=`<textarea id="informe" readonly>${t.join("\n")}</textarea>
+  <p class="noimp"><button id="copiar" class="sec">copiar el informe</button>
+   <button id="imprimir" class="sec">imprimir o guardar en PDF</button>
+   <button id="reintentar">volver al principio</button></p>`;
+ return s;
+}
+
+/* ============================ CÓDIGO Y ARRANQUE ============================ */
+function codigo(){
+ const c=ESTADO.crit;
+ const l1=(c.dis==="eca"&&c.ini==="24"&&c.des==="mrs3")?"B":(c.dis==="todos"?"A":"C");
+ const ls=[ESTADO.sala>0?l1:null,ESTADO.d2,ESTADO.d3,ESTADO.d4,ESTADO.d5,ESTADO.d6,ESTADO.d7]
+   .map(x=>x||"·").join("");
+ let chk=0;for(let i=0;i<ls.length;i++)chk+=ls.charCodeAt(i)*(i+2);
+ return "MOVE-"+ls+"-"+(chk%10);
+}
+function actualizaCodigo(){document.getElementById("codigo").textContent=codigo();}
+function reset(){ESTADO={sala:0,crit:{...CRIT_DEF},d1:null,d2:null,d3:null,d4:null,d5:null,d6:null,d7:null,prof:ESTADO.prof};
+ window.scrollTo(0,0);render();}
+document.getElementById("swProf").addEventListener("change",e=>{ESTADO.prof=e.target.checked;render();});
+document.getElementById("reiniciar").addEventListener("click",e=>{e.preventDefault();reset();});
+cargar();
+if(new URLSearchParams(location.search).get("profesor")==="1")ESTADO.prof=true;
+document.getElementById("swProf").checked=ESTADO.prof;
+render();
+</script>
+</body>
+</html>
