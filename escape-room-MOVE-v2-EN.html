@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The MOVE case file — a meta-analysis, step by step</title>
+<style>
+:root{--rojo:#C00000;--gris:#595959;--linea:#D9D9D9;--fondo:#F7F7F7;--ok:#1F6F3D;--amb:#8a5a00}
+*{box-sizing:border-box}
+body{margin:0;font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;color:#222;background:#fff;line-height:1.45}
+.wrap{max-width:940px;margin:0 auto;padding:16px 20px 60px}
+h1{font-size:24px;margin:0 0 2px}
+h2{font-size:20px;margin:0 0 4px}
+h3{font-size:16px;margin:18px 0 6px}
+.barra{height:3px;background:var(--rojo);width:100%;margin:0 0 14px}
+header .sub{color:var(--gris);font-size:14px;margin-bottom:10px}
+.pasos{display:flex;gap:4px;margin:10px 0 18px;flex-wrap:wrap}
+.paso{flex:1 1 0;min-width:96px;border:1px solid var(--linea);border-bottom:3px solid var(--linea);padding:5px 7px;font-size:11.5px;color:var(--gris);background:#fff}
+.paso b{display:block;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase}
+.paso.hecho{border-bottom-color:#9c9c9c;background:var(--fondo)}
+.paso.actual{border-bottom-color:var(--rojo);color:#222;font-weight:600}
+.caja{border:1px solid var(--linea);padding:12px 14px;margin:12px 0;background:#fff}
+.caja.gris{background:var(--fondo)}
+.enunciado{border-left:3px solid var(--rojo);padding:2px 0 2px 12px;margin:10px 0 16px}
+.enunciado p{margin:6px 0}
+.op{display:block;border:1px solid var(--linea);padding:10px 12px;margin:7px 0;cursor:pointer;background:#fff}
+.op:hover{background:var(--fondo)}
+.op input{margin-right:8px}
+.op.sel{border-color:var(--rojo);background:#fdf5f5}
+.op .et{font-weight:600}
+.op .ex{display:block;color:var(--gris);font-size:13.5px;margin-top:3px;margin-left:20px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:8px 0}
+th,td{border:1px solid var(--linea);padding:4px 7px;text-align:right}
+th{background:var(--fondo);text-align:center}
+td.l,th.l{text-align:left}
+td.fuera{color:#aaa}
+button{font-family:inherit;font-size:15px;padding:8px 18px;border:1px solid var(--rojo);background:var(--rojo);color:#fff;cursor:pointer}
+button:disabled{background:#bbb;border-color:#bbb;cursor:not-allowed}
+button.sec{background:#fff;color:var(--rojo)}
+select{font-family:inherit;font-size:14px;padding:4px 6px;border:1px solid var(--linea)}
+.crit{display:grid;grid-template-columns:1fr;gap:8px;margin:8px 0}
+.crit label{font-size:14px}
+.crit label b{display:block;font-weight:600;margin-bottom:2px}
+.contador{font-size:15px;padding:8px 12px;background:var(--fondo);border:1px solid var(--linea);margin:10px 0}
+.nota{font-size:13px;color:var(--gris)}
+.res{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.res div{border:1px solid var(--linea);padding:7px 12px;font-size:14px;min-width:120px}
+.res div b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--gris)}
+.prof{border:1px solid #d9b779;background:#fdf6e6;padding:9px 12px;margin:10px 0;font-size:13.5px}
+.ver{border:1px solid var(--linea);border-left:4px solid var(--linea);padding:9px 12px;margin:9px 0}
+.ver.b{border-left-color:var(--ok)}
+.ver.r{border-left-color:#8a5a00}
+.ver.m{border-left-color:var(--rojo)}
+.ver .t{font-weight:600}
+.ver .q{font-size:13.5px;color:#333;margin-top:3px}
+.ver .cita{font-size:12.5px;color:var(--gris);margin-top:3px}
+footer{border-top:1px solid var(--linea);margin-top:30px;padding-top:10px;font-size:13px;color:var(--gris);display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+code{background:var(--fondo);padding:1px 5px;font-size:13.5px}
+.hide{display:none}
+svg{max-width:100%;height:auto}
+textarea{width:100%;height:280px;font-family:Consolas,monospace;font-size:12px;border:1px solid var(--linea);padding:8px}
+.bandera{font-size:12px;color:var(--gris);border-top:1px dotted var(--linea);margin-top:8px;padding-top:5px}
+@media print{button,.pasos,footer,.noimp{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>The MOVE case file</h1>
+  <div class="barra"></div>
+  <div class="sub">Very early mobilisation after ischaemic stroke. You are the methodologist on this review: seven decisions, one per room. Nobody will tell you whether you got them right until the final report.</div>
+</header>
+
+<div class="pasos" id="pasos"></div>
+<div id="app"></div>
+
+<footer>
+  <div>Case-file code: <code id="codigo">MOVE-·······</code></div>
+  <div class="noimp">
+    <label style="cursor:pointer"><input type="checkbox" id="swProf"> teacher mode</label>
+    &nbsp;&nbsp;<a href="#" id="reiniciar" style="color:var(--rojo)">start over</a>
+  </div>
+</footer>
+</div>
+
+<script>
+/* ============================ DATA (fictitious) ============================ */
+const BANCO = [
+ {id:"alcazar",  et:"Alcázar 2011",     dis:"RCT",     ini:"<24h", des:"mRS3m",  e1:49, n1:190, e0:80, n0:190, int:"high",     cl:false, edad:68, alto:true,  rb:"low"},
+ {id:"petersen", et:"Petersen 2012",    dis:"RCT",     ini:"<24h", des:"mRS3m",  e1:107,n1:225, e0:99, n0:225, int:"moderate", cl:false, edad:72, alto:false, rb:"low"},
+ {id:"brenner",  et:"Brenner 2013",     dis:"RCT",     ini:"<24h", des:"mRS3m",  e1:48, n1:150, e0:69, n0:150, int:"high",     cl:false, edad:66, alto:true,  rb:"some concerns"},
+ {id:"duarte",   et:"Duarte 2014",      dis:"RCT",     ini:"<24h", des:"mRS3m",  e1:66, n1:140, e0:67, n0:140, int:"moderate", cl:false, edad:74, alto:false, rb:"low"},
+ {id:"nordmark", et:"Nordmark 2015",    dis:"RCT",     ini:"<24h", des:"mRS3m",  e1:84, n1:330, e0:132,n0:330, int:"high",     cl:false, edad:69, alto:false, rb:"low"},
+ {id:"okonkwo",  et:"Okonkwo 2016",     dis:"RCT",     ini:"<24h", des:"mRS3m",  e1:36, n1:125, e0:62, n0:125, int:"high",     cl:false, edad:64, alto:false, rb:"some concerns"},
+ {id:"haruna",   et:"Haruna 2017",      dis:"RCT",     ini:"<24h", des:"mRS3m",  e1:140,n1:380, e0:133,n0:380, int:"moderate", cl:true,  edad:71, alto:false, rb:"some concerns"},
+ {id:"vargas",   et:"Vargas 2018",      dis:"RCT",     ini:"<24h", des:"mRS3m",  e1:70, n1:255, e0:97, n0:255, int:"high",     cl:false, edad:67, alto:true,  rb:"low"},
+ {id:"mendel",   et:"Mendel 2019",      dis:"RCT",     ini:"<24h", des:"mRS3m",  e1:70, n1:185, e0:76, n0:185, int:"moderate", cl:false, edad:73, alto:true,  rb:"low"},
+ {id:"lindqvist",et:"Lindqvist 2020",   dis:"RCT",     ini:"<24h", des:"mRS3m",  e1:114,n1:480, e0:173,n0:480, int:"high",     cl:false, edad:70, alto:true,  rb:"low"},
+ {id:"move",     et:"MOVE-TRIAL 2021",  dis:"RCT",     ini:"<24h", des:"mRS3m",  e1:597,n1:1500,e0:585,n0:1500,int:"moderate", cl:false, edad:71, alto:true,  rb:"low"},
+ {id:"sorensen", et:"Sørensen 2022",    dis:"RCT",     ini:"<24h", des:"mRS3m",  e1:118,n1:290, e0:107,n0:290, int:"moderate", cl:false, edad:75, alto:false, rb:"low"},
+ /* rehabilitación tardía (> 7 días) */
+ {id:"kaminski", et:"Kaminski 2009",    dis:"RCT",     ini:">7d",  des:"Barthel",e1:34, n1:200, e0:30, n0:200, int:"—",        cl:false, edad:70, alto:false, rb:"some concerns"},
+ {id:"ribeiro",  et:"Ribeiro 2014",     dis:"RCT",     ini:">7d",  des:"mRS6m",  e1:22, n1:180, e0:48, n0:180, int:"—",        cl:false, edad:66, alto:false, rb:"high"},
+ {id:"fontaine", et:"Fontaine 2016",    dis:"RCT",     ini:">7d",  des:"Barthel",e1:95, n1:200, e0:80, n0:200, int:"—",        cl:false, edad:77, alto:false, rb:"high"},
+ {id:"osei",     et:"Osei 2019",        dis:"RCT",     ini:">7d",  des:"mRS6m",  e1:41, n1:300, e0:72, n0:300, int:"—",        cl:false, edad:69, alto:false, rb:"some concerns"},
+ /* fuera por diseño o por desenlace */
+ {id:"nordic",   et:"NORDIC Registry 2018",dis:"cohort",ini:"<24h",des:"mRS3m", e1:210,n1:1400,e0:340,n0:1400,int:"—",        cl:false, edad:73, alto:false, rb:"high"},
+ {id:"bhatt",    et:"Bhatt 2020",       dis:"RCT",     ini:"<24h", des:"muerte", e1:62, n1:700, e0:70, n0:700, int:"—",        cl:false, edad:72, alto:false, rb:"low"},
+ {id:"serrano",  et:"Serrano 2021",     dis:"cohort", ini:"<24h", des:"mRS6m",  e1:88, n1:520, e0:120,n0:520, int:"—",        cl:false, edad:74, alto:false, rb:"high"}
+];
+const DE_HARUNA = 1.62;   // design effect: 12 clusters of ~63 patients, ICC 0.01
+
+/* ============================ STATISTICS ============================ */
+function lgamma(x){const g=[676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+ if(x<0.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lgamma(1-x);
+ x-=1;let a=0.99999999999980993,t=x+7.5;for(let i=0;i<8;i++)a+=g[i]/(x+i+1);
+ return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a);}
+function gammap(s,x){ // lower regularised incomplete gamma
+ if(x<=0)return 0;
+ if(x<s+1){let ap=s,sum=1/s,del=sum;for(let n=1;n<200;n++){ap++;del*=x/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*1e-12)break;}
+  return sum*Math.exp(-x+s*Math.log(x)-lgamma(s));}
+ let b=x+1-s,c=1e30,d=1/b,h=d;
+ for(let i=1;i<200;i++){const an=-i*(i-s);b+=2;d=an*d+b;if(Math.abs(d)<1e-30)d=1e-30;c=b+an/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<1e-12)break;}
+ return 1-Math.exp(-x+s*Math.log(x)-lgamma(s))*h;}
+const chi2sf=(x,df)=>1-gammap(df/2,x/2);
+function betacf(a,b,x){let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;
+ if(Math.abs(d)<1e-30)d=1e-30;d=1/d;let h=d;
+ for(let m=1;m<200;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));
+  d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;h*=d*c;
+  aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;
+  const del=d*c;h*=del;if(Math.abs(del-1)<1e-12)break;}
+ return h;}
+function ibeta(a,b,x){if(x<=0)return 0;if(x>=1)return 1;
+ const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));
+ return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+const tsf=(t,df)=>0.5*ibeta(df/2,0.5,df/(df+t*t));            // upper tail
+const tp2=(t,df)=>2*tsf(Math.abs(t),df);                       // two-sided p
+function tinv975(df){let lo=0,hi=200;for(let i=0;i<100;i++){const m=(lo+hi)/2;if(tsf(m,df)>0.025)lo=m;else hi=m;}return (lo+hi)/2;}
+
+function efecto(s,meas){
+ const de=(s.cl && ESTADO.d3==="C")?DE_HARUNA:1;
+ const a=s.e1/de,n1=s.n1/de,c=s.e0/de,n0=s.n0/de,b=n1-a,d=n0-c;
+ if(meas==="RD")return{te:a/n1-c/n0,se:Math.sqrt(a*b/(n1**3)+c*d/(n0**3))};
+ if(meas==="OR")return{te:Math.log(a*d/(b*c)),se:Math.sqrt(1/a+1/b+1/c+1/d)};
+ return{te:Math.log((a/n1)/(c/n0)),se:Math.sqrt(1/a-1/n1+1/c-1/n0)};
+}
+function meta(rows,meas){
+ const r=rows.map(s=>efecto(s,meas)),k=r.length;
+ const w=r.map(x=>1/(x.se*x.se)),sw=w.reduce((a,b)=>a+b,0);
+ const F=r.reduce((a,x,i)=>a+w[i]*x.te,0)/sw, seF=Math.sqrt(1/sw);
+ const Q=r.reduce((a,x,i)=>a+w[i]*(x.te-F)**2,0), df=k-1;
+ const C=sw-w.reduce((a,x)=>a+x*x,0)/sw;
+ const tau2=Math.max(0,(Q-df)/C), I2=Math.max(0,(Q-df)/Q)*100;
+ const w2=r.map(x=>1/(x.se*x.se+tau2)), sw2=w2.reduce((a,b)=>a+b,0);
+ const R=r.reduce((a,x,i)=>a+w2[i]*x.te,0)/sw2, seR=Math.sqrt(1/sw2);
+ const tq=k>2?tinv975(k-2):3.18, half=tq*Math.sqrt(tau2+seR*seR);
+ return {k,df,r,meas,Q,I2,tau2,tau:Math.sqrt(tau2),pQ:chi2sf(Q,df),
+   F,seF,ciF:[F-1.96*seF,F+1.96*seF],R,seR,ciR:[R-1.96*seR,R+1.96*seR],
+   IP:[R-half,R+half],wF:w.map(x=>100*x/sw),wR:w2.map(x=>100*x/sw2)};
+}
+function egger(rows,meas){
+ const r=rows.map(s=>efecto(s,meas)),k=r.length;
+ const y=r.map(x=>x.te/x.se), x=r.map(x=>1/x.se);
+ const mx=x.reduce((a,b)=>a+b,0)/k, my=y.reduce((a,b)=>a+b,0)/k;
+ let sxy=0,sxx=0;for(let i=0;i<k;i++){sxy+=(x[i]-mx)*(y[i]-my);sxx+=(x[i]-mx)**2;}
+ const b1=sxy/sxx, b0=my-b1*mx;
+ let s2=0;for(let i=0;i<k;i++)s2+=(y[i]-b0-b1*x[i])**2; s2/=(k-2);
+ const seb0=Math.sqrt(s2*(1/k+mx*mx/sxx)), t=b0/seb0;
+ return {b0,t,df:k-2,p:tp2(t,k-2)};
+}
+function subgrupos(rows,meas,f){
+ const gs={};rows.forEach(s=>{const g=f(s);(gs[g]=gs[g]||[]).push(s);});
+ const out=Object.keys(gs).filter(g=>gs[g].length>=2).map(g=>({g,n:gs[g].length,m:meta(gs[g],meas)}));
+ if(out.length<2)return{grupos:out,Qb:NaN,p:NaN};
+ const w=out.map(o=>1/(o.m.seR*o.m.seR)),sw=w.reduce((a,b)=>a+b,0);
+ const mu=out.reduce((a,o,i)=>a+w[i]*o.m.R,0)/sw;
+ const Qb=out.reduce((a,o,i)=>a+w[i]*(o.m.R-mu)**2,0);
+ return {grupos:out,Qb,p:chi2sf(Qb,out.length-1)};
+}
+/* how each measure is displayed */
+const MEAS={RR:{n:"RR",log:true,nulo:1,largo:"risk ratios"},
+            OR:{n:"OR",log:true,nulo:1,largo:"odds ratios"},
+            RD:{n:"RD",log:false,nulo:0,largo:"risk differences"}};
+const measActual=()=>({A:"RD",B:"RR",C:"OR",D:"RD"})[ESTADO.d2]||"RR";
+function fx(v,meas){const M=MEAS[meas];const t=M.log?Math.exp(v).toFixed(2):(v*100).toFixed(1)+" %";return t;}
+function fci(ci,meas){return fx(ci[0],meas)+" to "+fx(ci[1],meas);}
+
+/* ============================ STATE ============================ */
+const CRIT_DEF={dis:"eca",ini:"24",des:"mrs3"};
+let ESTADO={sala:0,crit:{...CRIT_DEF},d1:null,d2:null,d3:null,d4:null,d5:null,d6:null,d7:null,prof:false};
+function guardar(){try{localStorage.setItem("moveV2en",JSON.stringify(ESTADO));}catch(e){}}
+function cargar(){try{const s=localStorage.getItem("moveV2en");if(s)ESTADO={...ESTADO,...JSON.parse(s)};}catch(e){}}
+
+function incluidos(){
+ const c=ESTADO.crit;
+ return BANCO.filter(s=>{
+  if(c.dis==="eca"&&s.dis!=="RCT")return false;
+  if(c.ini==="24"&&s.ini!=="<24h")return false;
+  if(c.des==="mrs3"&&s.des!=="mRS3m")return false;
+  if(c.des==="func"&&s.des==="muerte")return false;
+  return true;});
+}
+function conjuntoFinal(){
+ let rows=incluidos();
+ if(ESTADO.d3==="D")rows=rows.filter(s=>!s.cl);
+ return rows;
+}
+const modelo=()=>(ESTADO.d4==="A")?"fijo":"aleatorio";
+function filasAnalisis(){
+ let rows=conjuntoFinal();
+ if(ESTADO.d4==="D"){ // drop discordant trials until I² comes down
+   const meas=measActual();let cur=rows.slice();
+   for(let it=0;it<6;it++){const m=meta(cur,meas);if(m.I2<50)break;
+     let peor=0,dmax=-1;m.r.forEach((x,i)=>{const d=Math.abs(x.te-m.R);if(d>dmax){dmax=d;peor=i;}});
+     cur=cur.filter((_,i)=>i!==peor);}
+   rows=cur;}
+ return rows;
+}
+
+/* ============================ PLOTS ============================ */
+function forest(rows,m,opts={}){
+ const meas=m.meas,M=MEAS[meas],k=rows.length,mod=opts.model||modelo();
+ const W=900,fila=20,top=42,H=top+k*fila+(opts.ip?92:70);
+ const x0=440,x1=790;
+ let lo=Math.min(...m.r.map((x,i)=>x.te-1.96*x.se),m.ciR[0],opts.ip?m.IP[0]:m.ciR[0]);
+ let hi=Math.max(...m.r.map((x,i)=>x.te+1.96*x.se),m.ciR[1],opts.ip?m.IP[1]:m.ciR[1]);
+ const pad=(hi-lo)*0.08;lo-=pad;hi+=pad;
+ const X=v=>x0+(v-lo)/(hi-lo)*(x1-x0);
+ const ticks=M.log?[0.4,0.5,0.6,0.75,1,1.25,1.5,2].map(t=>({v:Math.log(t),l:String(t)}))
+                  :[-0.2,-0.15,-0.1,-0.05,0,0.05,0.1].map(t=>({v:t,l:(t*100)+" %"}));
+ let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Calibri,Carlito,Arial" font-size="12.5">`;
+ s+=`<text x="0" y="16" font-weight="bold">Study</text><text x="345" y="16" font-weight="bold" text-anchor="end">${M.n} (95 % CI)</text>`;
+ s+=`<text x="415" y="16" font-weight="bold" text-anchor="end">Weight</text>`;
+ s+=`<line x1="${X(M.log?0:0)}" y1="${top-10}" x2="${X(0)}" y2="${top+k*fila+6}" stroke="#777"/>`;
+ const pesos=(mod==="fijo")?m.wF:m.wR;
+ rows.forEach((st,i)=>{
+  const y=top+i*fila+8,e=m.r[i];
+  const lo95=X(e.te-1.96*e.se),hi95=X(e.te+1.96*e.se);
+  const col=(opts.color&&st.int!=="—")?(st.int==="high"?"#C00000":"#2b5c9b"):"#333";
+  s+=`<text x="0" y="${y+4}">${st.et}${st.cl?" (cluster)":""}</text>`;
+  s+=`<text x="345" y="${y+4}" text-anchor="end">${fx(e.te,meas)} (${fci([e.te-1.96*e.se,e.te+1.96*e.se],meas)})</text>`;
+  s+=`<text x="415" y="${y+4}" text-anchor="end">${pesos[i].toFixed(1)} %</text>`;
+  s+=`<line x1="${lo95}" y1="${y}" x2="${hi95}" y2="${y}" stroke="${col}"/>`;
+  const lado=Math.max(3.2,Math.min(9,Math.sqrt(pesos[i])*2.2));
+  s+=`<rect x="${X(e.te)-lado/2}" y="${y-lado/2}" width="${lado}" height="${lado}" fill="${col}"/>`;
+ });
+ const yd=top+k*fila+16,est=mod==="fijo"?m.F:m.R,ci=mod==="fijo"?m.ciF:m.ciR;
+ s+=`<polygon points="${X(ci[0])},${yd} ${X(est)},${yd-6} ${X(ci[1])},${yd} ${X(est)},${yd+6}" fill="#C00000"/>`;
+ s+=`<text x="0" y="${yd+4}" font-weight="bold">Overall (${mod==="fijo"?"fixed":"random"} effects)</text>`;
+ s+=`<text x="415" y="${yd+4}" text-anchor="end" font-weight="bold">${fx(est,meas)} (${fci(ci,meas)})</text>`;
+ if(opts.ip){s+=`<line x1="${X(m.IP[0])}" y1="${yd+18}" x2="${X(m.IP[1])}" y2="${yd+18}" stroke="#C00000" stroke-dasharray="4 3"/>`;
+  s+=`<text x="0" y="${yd+22}">95 % prediction interval</text><text x="415" y="${yd+22}" text-anchor="end">${fci(m.IP,meas)}</text>`;}
+ const ye=top+k*fila+(opts.ip?42:26);
+ s+=`<line x1="${x0}" y1="${ye}" x2="${x1}" y2="${ye}" stroke="#777"/>`;
+ ticks.forEach(t=>{if(t.v<lo||t.v>hi)return;s+=`<line x1="${X(t.v)}" y1="${ye}" x2="${X(t.v)}" y2="${ye+4}" stroke="#777"/><text x="${X(t.v)}" y="${ye+16}" text-anchor="middle">${t.l}</text>`;});
+ s+=`<text x="${X(0)-10}" y="${ye+30}" text-anchor="end" fill="#595959">favours very early mobilisation</text>`;
+ s+=`<text x="${X(0)+10}" y="${ye+30}" fill="#595959">favours usual care</text>`;
+ return s+"</svg>";
+}
+function funnel(rows,m,color){
+ const meas=m.meas,W=560,H=380,l=70,r=20,t=20,b=44;
+ const ses=m.r.map(x=>x.se),semax=Math.max(...ses)*1.08;
+ const c=m.R,lo=c-2.6*semax,hi=c+2.6*semax;
+ const X=v=>l+(v-lo)/(hi-lo)*(W-l-r), Y=s=>t+(s/semax)*(H-t-b);
+ let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Calibri,Carlito,Arial" font-size="12">`;
+ s+=`<polygon points="${X(c)},${Y(0)} ${X(c-1.96*semax)},${Y(semax)} ${X(c+1.96*semax)},${Y(semax)}" fill="#f2f2f2" stroke="#bbb" stroke-dasharray="4 3"/>`;
+ s+=`<line x1="${X(c)}" y1="${Y(0)}" x2="${X(c)}" y2="${Y(semax)}" stroke="#999"/>`;
+ rows.forEach((st,i)=>{const col=color?(st.int==="high"?"#C00000":st.int==="moderate"?"#2b5c9b":"#777"):"#333";
+  s+=`<circle cx="${X(m.r[i].te)}" cy="${Y(m.r[i].se)}" r="4.5" fill="${col}" fill-opacity=".8"/>`;});
+ s+=`<line x1="${l}" y1="${H-b}" x2="${W-r}" y2="${H-b}" stroke="#777"/><line x1="${l}" y1="${t}" x2="${l}" y2="${H-b}" stroke="#777"/>`;
+ const ticks=MEAS[meas].log?[0.4,0.5,0.6,0.8,1,1.25,1.6,2].map(v=>({v:Math.log(v),l:String(v)})):[-0.25,-0.2,-0.15,-0.1,-0.05,0,0.05,0.1].map(v=>({v,l:(v*100)+" %"}));
+ ticks.forEach(k=>{if(k.v<lo||k.v>hi)return;s+=`<line x1="${X(k.v)}" y1="${H-b}" x2="${X(k.v)}" y2="${H-b+4}" stroke="#777"/><text x="${X(k.v)}" y="${H-b+17}" text-anchor="middle">${k.l}</text>`;});
+ [0,semax/2,semax].forEach(v=>{s+=`<line x1="${l-4}" y1="${Y(v)}" x2="${l}" y2="${Y(v)}" stroke="#777"/><text x="${l-7}" y="${Y(v)+4}" text-anchor="end">${v.toFixed(2)}</text>`;});
+ s+=`<text x="${(l+W-r)/2}" y="${H-8}" text-anchor="middle" fill="#595959">${MEAS[meas].n} of each trial</text>`;
+ s+=`<text transform="translate(16,${(t+H-b)/2}) rotate(-90)" text-anchor="middle" fill="#595959">standard error</text>`;
+ if(color)s+=`<circle cx="${W-150}" cy="30" r="4.5" fill="#C00000"/><text x="${W-140}" y="34">high intensity</text><circle cx="${W-150}" cy="48" r="4.5" fill="#2b5c9b"/><text x="${W-140}" y="52">moderate intensity</text>`;
+ return s+"</svg>";
+}
+
+/* ============================ ROOMS ============================ */
+const SALAS=[
+ {n:"Room 1",t:"Eligibility criteria",cap:"Cochrane Handbook, ch. 3"},
+ {n:"Room 2",t:"Scale and effect measure",cap:"Cochrane Handbook, ch. 6"},
+ {n:"Room 3",t:"Pooling method and unit of analysis",cap:"Cochrane Handbook, chs. 10 and 23"},
+ {n:"Room 4",t:"Heterogeneity and model",cap:"Cochrane Handbook, ch. 10"},
+ {n:"Room 5",t:"Subgroup analysis",cap:"Cochrane Handbook, ch. 10"},
+ {n:"Room 6",t:"Influence, sensitivity and publication bias",cap:"Cochrane Handbook, ch. 13"},
+ {n:"Room 7",t:"Certainty and recommendation",cap:"Egger 2022, ch. 22"}
+];
+function pintaPasos(){
+ document.getElementById("pasos").innerHTML=SALAS.map((s,i)=>
+  `<div class="paso ${i<ESTADO.sala?"hecho":""} ${i===ESTADO.sala?"actual":""}"><b>${s.n}</b>${s.t}</div>`).join("");
+}
+
+/* ---- option texts ---- */
+const OPC={
+ d2:[["A","Additive scale: pool the risk differences (RD)","The effect is expressed as how many bad outcomes per 100 patients are avoided. Null value, 0."],
+     ["B","Multiplicative scale: pool the risk ratios (RR)","Each trial contributes the ratio of the risk in the mobilised group to the risk in the control group. Null value, 1."],
+     ["C","Multiplicative scale: pool the odds ratios (OR)","Each trial contributes a ratio of odds. Null value, 1."],
+     ["D","Pool the NNTs reported by each trial","Average the number needed to treat across the twelve trials."]],
+ d3:[["A","Mantel-Haenszel on the raw 2\u00d72 tables of every trial","Mantel-Haenszel weighting, using each trial's table exactly as published."],
+     ["B","Inverse variance on the raw 2\u00d72 tables of every trial","Weighting by precision, using the tables exactly as published."],
+     ["C","Inverse variance, correcting the cluster trial for its design effect","Haruna 2017 randomised 12 whole stroke units, not patients. Its effective sample size is divided by the design effect (1.62) before pooling."],
+     ["D","Exclude Haruna 2017 because it is a cluster-randomised trial","Only individually randomised trials are pooled."]],
+ d4:[["A","Fixed effect: this is the primary analysis and should not be changed after seeing the results","The assumption of one common true effect is kept."],
+     ["B","Random effects, also reporting the prediction interval","\u03c4\u00b2 is estimated, the trials are reweighted, and the range in which a future trial's effect would fall is reported."],
+     ["C","Random effects, reporting only the confidence interval of the mean effect","\u03c4\u00b2 is estimated and the trials reweighted; the report gives the mean effect and its 95 % CI."],
+     ["D","Drop the most discordant trials until I\u00b2 falls below 50 %","Trials furthest from the pooled effect are removed one by one."],
+     ["E","Do not pool: with I\u00b2 around 80 % these trials cannot be combined; narrative synthesis","The trials are presented one by one, with no overall estimate."]],
+ d5:[["A","No subgroup analysis: twelve trials give too little power","Only the overall effect is reported."],
+     ["B","Intensity of the mobilisation protocol only, prespecified in PROSPERO","High versus moderate: one of the two variables registered in the protocol before any results were seen."],
+     ["C","Publication in a high-impact journal versus the rest","A variable that was not prespecified, suggested by reading the trials."],
+     ["D","Explore all eight available variables and keep whichever comes out significant","Intensity, age, sex, country, year, size, risk of bias and journal, one at a time."]],
+ d6:[["A","The funnel is asymmetric and Egger's test is significant: declare publication bias and correct the effect with trim-and-fill","The effect adjusted for the imputed trials is reported as the main result."],
+     ["B","Exclude the most influential trial (MOVE-TRIAL) and take that result as the main one","The influence analysis identifies the trial carrying most weight; the meta-analysis is reported without it."],
+     ["C","Prespecified sensitivity analysis, without reading the asymmetry as publication bias","The analysis is repeated changing model, effect measure and the handling of the cluster trial, and the funnel asymmetry is interpreted in the light of the heterogeneity already explained."],
+     ["D","None: robustness analyses are optional and the main result is already calculated","Go straight to the conclusion."]],
+ d7:[["A","Recommend very early mobilisation for all patients with ischaemic stroke","The pooled effect is favourable and statistically significant."],
+     ["B","Do not recommend very early mobilisation in any circumstances","The prediction interval includes harm."],
+     ["C","Recommend the high-intensity protocol and advise against the moderate-intensity one","The overall mean effect describes no real patient: there are two different interventions under one name."],
+     ["D","There is not enough evidence to recommend anything; more research is needed","A definitive trial is called for."]]
+};
+/* immediate consequence, shown only in teacher mode */
+const PROF={
+ d2:{A:"The additive scale is legitimate, but baseline risk here ranges from 26 % to 49 % across trials: the RD will be more heterogeneous than the RR.",
+     B:"Correct: multiplicative, null value 1, pooled on the log scale.",
+     C:"The OR is valid, but with 40 % bad outcomes it moves further from the null than the RR; readers will interpret it as a risk ratio.",
+     D:"Serious error: the NNT is the reciprocal of the RD and is not averaged across studies."},
+ d3:{A:"Unit-of-analysis error: Haruna is weighted as if it had randomised 760 independent patients.",
+     B:"Same unit-of-analysis error; the weighting method does not fix it.",
+     C:"Correct: Haruna's weight falls from 8.4 % to 5.4 %.",
+     D:"A whole trial is lost when correcting it would have been enough; acceptable, but not the preferred solution."},
+ d4:{A:"With I\u00b2 around 80 % the fixed-effect CI is spuriously narrow.",
+     B:"Correct: random-effects model plus prediction interval.",
+     C:"Right model, incomplete report: without the prediction interval the reader cannot see the real dispersion.",
+     D:"Dropping trials for being discordant lets the result choose the data.",
+     E:"The answer to heterogeneity is to explain it, not to give up."},
+ d5:{A:"The only variable that explains the heterogeneity is left unexamined.",
+     B:"Correct: prespecified, between-trial, with a prior hypothesis.",
+     C:"Classic false positive: the journal is not a feature of the intervention.",
+     D:"Dredging: with eight comparisons the chance of a false positive is above 34 %."},
+ d6:{A:"The funnel asymmetry here comes from the two protocols, not from unpublished trials.",
+     B:"Dropping the large trial because it is inconvenient is not an influence analysis, it is a bias.",
+     C:"Correct: prespecified sensitivity analysis and due caution with the funnel.",
+     D:"Without robustness checks there is no way to know whether the result hangs on one particular decision."},
+ d7:{A:"Recommends to everyone an average that describes nobody.",
+     B:"Also advises against the protocol that does work.",
+     C:"Correct, provided the report supports it.",
+     D:"There are already twelve trials and 4,355 patients; the problem is not quantity."}
+};
+
+function render(){
+ pintaPasos();guardar();actualizaCodigo();
+ const app=document.getElementById("app");
+ app.innerHTML=[sala1,sala2,sala3,sala4,sala5,sala6,sala7][ESTADO.sala]();
+ app.querySelectorAll("[data-op]").forEach(el=>el.addEventListener("click",()=>{
+   const campo=el.dataset.campo;ESTADO[campo]=el.dataset.op;render();}));
+ const b=app.querySelector("#avanzar");
+ if(b)b.addEventListener("click",()=>{ESTADO.sala++;window.scrollTo(0,0);render();});
+ app.querySelectorAll("select[data-crit]").forEach(s=>s.addEventListener("change",()=>{
+   ESTADO.crit[s.dataset.crit]=s.value;render();}));
+ const cp=app.querySelector("#copiar");
+ if(cp)cp.addEventListener("click",()=>{const t=document.getElementById("informe");t.select();
+   try{document.execCommand("copy");cp.textContent="copied";}catch(e){}});
+ const im=app.querySelector("#imprimir");if(im)im.addEventListener("click",()=>window.print());
+ const rr=app.querySelector("#reintentar");if(rr)rr.addEventListener("click",reset);
+}
+function opciones(campo){
+ return OPC[campo].map(([k,tit,ex])=>
+  `<label class="op ${ESTADO[campo]===k?"sel":""}" data-op="${k}" data-campo="${campo}">
+    <input type="radio" ${ESTADO[campo]===k?"checked":""}> <span class="et">${tit}</span>
+    <span class="ex">${ex}</span></label>`).join("");
+}
+function pie(campo,texto){
+ const listo=ESTADO[campo]!==null;
+ let s="";
+ if(ESTADO.prof&&listo){
+  let msg;
+  if(campo==="d1"){const inc=incluidos();
+   msg=(inc.length===12&&inc.every(x=>x.dis==="RCT"&&x.ini==="<24h"&&x.des==="mRS3m"))
+     ?"Criteria correct: the 12 core trials."
+     :"Criteria too broad: "+inc.length+" studies get in, with interventions, designs or outcomes that do not answer the question.";
+  } else msg=(PROF[campo]||{})[ESTADO[campo]]||"";
+  if(msg)s+=`<div class="prof"><b>Teacher mode.</b> ${msg}</div>`;
+ }
+ s+=`<p><button id="avanzar" ${listo?"":"disabled"}>${texto||"Seal this decision and continue"}</button>
+     <span class="nota" style="margin-left:10px">The decision is sealed into the case file. You will not see its consequences for the result until room 7.</span></p>`;
+ return s;
+}
+function cab(i,extra){
+ return `<h2>${SALAS[i].n}. ${SALAS[i].t}</h2><div class="barra"></div>
+   <div class="nota">Step ${i+1} of 7 — further reading: ${SALAS[i].cap}</div>${extra||""}`;
+}
+
+/* reason a study fails the current criteria */
+function razones(st,c){
+ const r=[];
+ if(c.dis==="eca"&&st.dis!=="RCT")r.push("design: it is a "+(st.dis==="cohort"?"cohort study":st.dis)+", not a randomised trial");
+ if(c.ini==="24"&&st.ini!=="<24h")r.push("timing: "+(st.ini===">7d"?"starts after 7 days, not within the first 24 h":"start time is not < 24 h"));
+ if(c.des==="mrs3"&&st.des!=="mRS3m")r.push("outcome: measures "+({mRS6m:"mRS at 6 months, not at 3",Barthel:"Barthel at discharge, not mRS at 3 months",muerte:"30-day mortality, not functional dependence"})[st.des]);
+ else if(c.des==="func"&&st.des==="muerte")r.push("outcome: measures mortality, not functional dependence");
+ return r;
+}
+/* ---------- ROOM 1 ---------- */
+function sala1(){
+ ESTADO.d1="X";
+ const inc=incluidos(),c=ESTADO.crit,fuera=BANCO.filter(st=>!inc.includes(st));
+ let s=cab(0,`<div class="enunciado">
+  <p><b>The question.</b> In adults with acute ischaemic stroke, does very early mobilisation (started within 24 h) compared with usual care reduce functional dependence at three months (mRS 3-6)?</p>
+  <p><b>What you decide here:</b> the eligibility criteria. They alone determine which studies from the bank enter the meta-analysis. There is nothing else to choose in this room: the resulting set is your decision, and it carries through the six rooms that follow.</p></div>`);
+ s+=`<div class="caja gris"><div class="crit">
+  <label><b>Eligible designs</b><select data-crit="dis">
+    <option value="eca" ${c.dis==="eca"?"selected":""}>Randomised trials only</option>
+    <option value="todos" ${c.dis==="todos"?"selected":""}>Randomised trials and cohort studies</option></select></label>
+  <label><b>Timing of mobilisation</b><select data-crit="ini">
+    <option value="24" ${c.ini==="24"?"selected":""}>Started within 24 h of stroke onset</option>
+    <option value="todos" ${c.ini==="todos"?"selected":""}>Any timing (early mobilisation or late rehabilitation)</option></select></label>
+  <label><b>Primary outcome</b><select data-crit="des">
+    <option value="mrs3" ${c.des==="mrs3"?"selected":""}>mRS 3-6 at 3 months</option>
+    <option value="func" ${c.des==="func"?"selected":""}>Any measure of functional dependence (mRS or Barthel, at 3 or 6 months)</option>
+    <option value="clin" ${c.des==="clin"?"selected":""}>Any clinical outcome, mortality included</option></select></label>
+ </div>
+ <div class="contador">The bank has <b>19</b> studies. Your criteria let in <b>${inc.length}</b> and leave out <b>${fuera.length}</b>.</div></div>`;
+ s+=`<h3>Studies included (${inc.length})</h3>`;
+ if(inc.length===0)s+=`<div class="caja gris nota">No study meets these criteria.</div>`;
+ else{s+=`<table><tr><th class="l">Study</th><th>Design</th><th>Timing</th><th>Outcome</th><th>N</th></tr>`;
+  inc.forEach(st=>{const des={mRS3m:"mRS 3-6, 3 mo",mRS6m:"mRS 3-6, 6 mo",Barthel:"Barthel at discharge",muerte:"30-day mortality"}[st.des];
+   s+=`<tr><td class="l">${st.et}${st.cl?" (cluster)":""}</td><td>${st.dis}</td><td>${st.ini}</td><td class="l">${des}</td><td>${st.n1+st.n0}</td></tr>`;});
+  s+="</table>";}
+ s+=`<h3>Studies excluded by your criteria (${fuera.length})</h3>`;
+ if(fuera.length===0)s+=`<div class="caja gris nota">No study in the bank is left out.</div>`;
+ else{s+=`<table><tr><th class="l">Study</th><th>Design</th><th>Timing</th><th>Outcome</th><th>N</th><th class="l">Why it is out</th></tr>`;
+  fuera.forEach(st=>{const des={mRS3m:"mRS 3-6, 3 mo",mRS6m:"mRS 3-6, 6 mo",Barthel:"Barthel at discharge",muerte:"30-day mortality"}[st.des];
+   s+=`<tr class="fuera"><td class="l">${st.et}${st.cl?" (cluster)":""}</td><td>${st.dis}</td><td>${st.ini}</td><td class="l">${des}</td><td>${st.n1+st.n0}</td>
+    <td class="l">${razones(st,c).join("; ")}</td></tr>`;});
+  s+="</table>";}
+ s+=pie("d1","Register the criteria and continue");
+ return s;
+}
+/* ---------- ROOM 2 ---------- */
+function sala2(){
+ const rows=incluidos();
+ const r0=rows.reduce((a,s)=>a+s.e0,0)/rows.reduce((a,s)=>a+s.n0,0);
+ let s=cab(1,`<div class="enunciado">
+  <p><b>What you decide here:</b> the scale on which the effect is expressed and the measure that will be pooled. Everything you see from now on will be in the measure you choose.</p>
+  <p>You have ${rows.length} studies. In the control groups, ${(100*r0).toFixed(0)} % of patients end up with a bad functional outcome: this is not a rare event.</p></div>`);
+ s+=`<div class="caja gris"><table><tr><th class="l">Study</th><th>Events / n (mobilisation)</th><th>Events / n (usual care)</th><th>Control risk</th></tr>`;
+ rows.forEach(st=>{s+=`<tr><td class="l">${st.et}</td><td>${st.e1} / ${st.n1}</td><td>${st.e0} / ${st.n0}</td><td>${(100*st.e0/st.n0).toFixed(0)} %</td></tr>`;});
+ s+="</table></div>";
+ s+=opciones("d2")+pie("d2");
+ return s;
+}
+/* ---------- ROOM 3 ---------- */
+function sala3(){
+ const meas=measActual(),rows=incluidos();
+ const m=meta(rows,meas);
+ const iH=rows.findIndex(s=>s.cl);
+ let s=cab(2,`<div class="enunciado">
+  <p><b>What you decide here:</b> how the studies are weighted, and what to do with the trial that did not randomise patients.</p>
+  <p>You are working with ${MEAS[meas].largo} (${MEAS[meas].n}). ${iH>=0?`<b>Haruna 2017</b> randomised 12 whole stroke units — about 63 patients each — and reports its data as if every patient were independent. With an intracluster correlation coefficient of 0.01, its design effect is 1.62.`:"No trial in your set is cluster-randomised."}</p></div>`);
+ if(iH>=0){s+=`<div class="caja gris"><b>Weight of Haruna 2017 using the raw table:</b> ${m.wF[iH].toFixed(1)} % of the total under fixed effects.
+  <div class="nota">Remember: using the raw cells of a cluster-randomised design reintroduces the unit-of-analysis error.</div></div>`;}
+ s+=opciones("d3")+pie("d3");
+ return s;
+}
+/* ---------- ROOM 4 ---------- */
+function sala4(){
+ const meas=measActual(),rows=conjuntoFinal(),m=meta(rows,meas);
+ let s=cab(3,`<div class="enunciado">
+  <p><b>What you decide here:</b> which model is used to pool and what is reported alongside it. Before deciding, look at how scattered the squares are in the forest plot and at the three measures of heterogeneity.</p></div>`);
+ s+=`<div class="res">
+  <div><b>Cochran's Q</b>${m.Q.toFixed(1)} (df ${m.df}); p ${m.pQ<0.001?"< 0.001":("= "+m.pQ.toFixed(3))}</div>
+  <div><b>I²</b>${m.I2.toFixed(1)} %</div>
+  <div><b>τ²</b>${m.tau2.toFixed(3)} &nbsp;(τ = ${m.tau.toFixed(2)})</div>
+  <div><b>Fixed effect</b>${fx(m.F,meas)} (${fci(m.ciF,meas)})</div>
+  <div><b>Random effects</b>${fx(m.R,meas)} (${fci(m.ciR,meas)})</div>
+  <div><b>Prediction interval</b>${fci(m.IP,meas)}</div></div>`;
+ s+=`<div class="caja">${forest(rows,m,{ip:false,model:"fijo"})}</div>`+`<div class="nota">Forest plot of the primary analysis you bring from room 3, with fixed-effect weighting.</div>`;
+ s+=opciones("d4")+pie("d4");
+ return s;
+}
+/* ---------- ROOM 5 ---------- */
+const AVISO_E=`<div class="nota" style="border:1px solid #d9b779;background:#fdf6e6;padding:7px 10px;margin:8px 0">You decided not to pool the trials. Even so, the protocol requires an attempt to explain the heterogeneity and to check robustness, so the figures below are computed under a random-effects model for exploratory purposes only.</div>`;
+function sala5(){
+ const meas=measActual(),rows=filasAnalisis(),m=meta(rows,meas);
+ let s=cab(4,`<div class="enunciado">
+  <p><b>What you decide here:</b> which subgroup analysis is run to try to explain the heterogeneity. Only the one you choose will be run, and its result is the only one you will have when writing the recommendation.</p>
+  <p class="nota">The protocol registered on PROSPERO prespecified two subgroup variables: <b>intensity of the mobilisation protocol</b> (high or moderate) and <b>mean age in the trial</b> (under 70 years, or 70 and over). The other variables in the table were collected during data extraction.</p></div>`);
+ if(ESTADO.d4==="E")s+=AVISO_E;
+ s+=`<div class="caja gris"><table><tr><th class="l">Study</th><th>Intensity</th><th>Mean age</th><th>High-impact journal</th><th>Risk of bias</th></tr>`;
+ rows.forEach(st=>{s+=`<tr><td class="l">${st.et}</td><td>${st.int}</td><td>${st.edad}</td><td>${st.alto?"yes":"no"}</td><td>${st.rb}</td></tr>`;});
+ s+=`</table><div class="nota">Starting point: overall ${MEAS[meas].n} ${fx(modelo()==="fijo"?m.F:m.R,meas)}, I² = ${m.I2.toFixed(1)} %.</div></div>`;
+ s+=opciones("d5")+pie("d5");
+ return s;
+}
+/* result of the chosen subgroup analysis, visible from room 6 */
+function resSub(){
+ const meas=measActual(),rows=filasAnalisis();
+ if(ESTADO.d5==="B")return subgrupos(rows,meas,s=>s.int==="—"?"unclassified":s.int+" intensity");
+ if(ESTADO.d5==="C")return subgrupos(rows,meas,s=>s.alto?"high-impact journal":"other journals");
+ if(ESTADO.d5==="D")return subgrupos(rows,meas,s=>s.alto?"high-impact journal":"other journals");
+ return null;
+}
+/* ---------- ROOM 6 ---------- */
+function sala6(){
+ const meas=measActual(),rows=filasAnalisis(),m=meta(rows,meas),eg=egger(rows,meas),sg=resSub();
+ let s=cab(5,`<div class="enunciado">
+  <p><b>What you decide here:</b> what to do about the robustness of the result. In front of you are the influence analysis, the funnel plot and Egger\u2019s test.</p></div>`);
+ if(ESTADO.d4==="E")s+=AVISO_E;
+ if(sg&&sg.grupos.length>1){
+  s+=`<h3>What your subgroup analysis returned</h3><table><tr><th class="l">Subgroup</th><th>k</th><th>${MEAS[meas].n} (95 % CI)</th><th>I²</th></tr>`;
+  sg.grupos.forEach(g=>{s+=`<tr><td class="l">${g.g}</td><td>${g.n}</td><td>${fx(g.m.R,meas)} (${fci(g.m.ciR,meas)})</td><td>${g.m.I2.toFixed(0)} %</td></tr>`;});
+  s+=`</table><div class="nota">Test for interaction: Q = ${sg.Qb.toFixed(1)}; p ${sg.p<0.001?"< 0.001":("= "+sg.p.toFixed(3))}${ESTADO.d5==="D"?" \u2014 obtained after exploring eight variables.":""}</div>`;
+ } else {
+  s+=`<div class="caja gris">${ESTADO.d5==="A"?"You have no subgroup result: in room 5 you decided not to run one.":"The subgroup analysis you chose cannot be run on the set that is left: one of the groups now has fewer than two studies."}</div>`;
+ }
+ s+=`<h3>Influence analysis (leaving out one trial at a time)</h3><table><tr><th class="l">Trial omitted</th><th>Overall ${MEAS[meas].n}</th><th>I²</th></tr>`;
+ rows.forEach((st,i)=>{const mm=meta(rows.filter((_,j)=>j!==i),meas);
+  s+=`<tr><td class="l">${st.et}</td><td>${fx(modelo()==="fijo"?mm.F:mm.R,meas)}</td><td>${mm.I2.toFixed(0)} %</td></tr>`;});
+ s+=`</table><div class="nota">Reference value with all trials in: ${fx(modelo()==="fijo"?m.F:m.R,meas)}, I² = ${m.I2.toFixed(0)} %.</div>`;
+ s+=`<h3>Funnel plot and Egger\u2019s test</h3><div class="caja">${funnel(rows,m,ESTADO.d5==="B")}</div>`;
+ s+=`<div class="res"><div><b>Egger intercept</b>${eg.b0.toFixed(2)}</div><div><b>t (df ${eg.df})</b>${eg.t.toFixed(2)}</div>
+   <div><b>p</b>${eg.p<0.001?"< 0.001":eg.p.toFixed(3)}</div></div>`;
+ if(ESTADO.d5==="B"){
+  const alta=rows.filter(x=>x.int==="high"),mod=rows.filter(x=>x.int==="moderate");
+  if(alta.length>2&&mod.length>2){const ea=egger(alta,meas),em=egger(mod,meas);
+   s+=`<div class="nota">Egger\u2019s test within each subgroup: high intensity p = ${ea.p.toFixed(2)}; moderate intensity p = ${em.p.toFixed(2)}.</div>`;}
+ }
+ s+=opciones("d6")+pie("d6");
+ return s;
+}
+/* ---------- ROOM 7 ---------- */
+function sala7(){
+ const meas=measActual(),rows=filasAnalisis(),m=meta(rows,meas);
+ if(ESTADO.d7===null){
+  let s=cab(6,`<div class="enunciado">
+   <p><b>What you decide here:</b> the recommendation that goes into the clinical guideline. Sealing it opens the report on everything you have done.</p></div>`);
+  s+=`<div class="res"><div><b>Studies pooled</b>${rows.length}</div>
+   <div><b>Measure and model</b>${MEAS[meas].n}, ${modelo()==="fijo"?"fixed":"random"} effects</div>
+   <div><b>Result</b>${fx(modelo()==="fijo"?m.F:m.R,meas)} (${fci(modelo()==="fijo"?m.ciF:m.ciR,meas)})</div>
+   ${ESTADO.d4==="B"?`<div><b>Prediction interval</b>${fci(m.IP,meas)}</div>`:""}</div>`;
+  s+=opciones("d7")+pie("d7","Seal the recommendation and open the report");
+  return s;
+ }
+ return informe();
+}
+
+/* ============================ VERDICTS ============================ */
+function veredictos(){
+ const inc=incluidos(),V=[];
+ const nucleo=inc.length===12&&inc.every(s=>s.dis==="RCT"&&s.ini==="<24h"&&s.des==="mRS3m");
+ let v1;
+ if(nucleo)v1={n:"b",t:"Criteria correct",q:"The three criteria reproduce the PICO question: randomised trials, mobilisation started within 24 h, mRS 3-6 at three months. The 12 trials that answer the question are the ones that get in.",c:"Cochrane Handbook, ch. 3; Egger 2022, ch. 4."};
+ else{
+  const falta=[];
+  if(ESTADO.crit.dis==="todos")falta.push("you admitted cohort studies, in which the patients mobilised earliest are the ones who were already doing better: confounding by indication walks straight into the result");
+  if(ESTADO.crit.ini==="todos")falta.push("you mixed very early mobilisation with late rehabilitation, which is a different intervention");
+  if(ESTADO.crit.des!=="mrs3")falta.push("you admitted outcomes other than the prespecified one, measured on different scales and at different time points");
+  v1={n:"m",t:"Criteria too broad",q:"You pooled "+inc.length+" studies because "+falta.join("; and ")+". Eligibility criteria are the operational translation of the question: widen them and the meta-analysis answers a question nobody asked.",c:"Cochrane Handbook, ch. 3; Egger 2022, ch. 4."};
+ }
+ V.push(v1);
+ const V2={A:{n:"r",t:"Additive scale: defensible, but not the best choice here",q:"The risk difference expresses clinical impact and is what yields the NNT, but it depends on baseline risk, and here the control-group risk ranges from 26 % to 49 % across trials. That adds heterogeneity which does not come from the treatment.",c:"Cochrane Handbook, ch. 6."},
+  B:{n:"b",t:"Correct measure",q:"The risk ratio is the usual multiplicative measure for trials with a binary outcome; it is pooled on the log scale, for symmetry and for normality.",c:"Cochrane Handbook, ch. 6; Egger 2022, ch. 9."},
+  C:{n:"r",t:"Odds ratio with a common outcome",q:"The OR is a valid measure, but with 40 % bad outcomes it sits further from the null than the RR. Whoever reads your report will interpret it as a risk ratio and will believe the effect is larger than it is.",c:"Cochrane Handbook, ch. 6."},
+  D:{n:"m",t:"NNTs are not pooled",q:"The NNT is the reciprocal of the risk difference and has no standard error that would allow it to be weighted; averaging the NNTs of several trials does not give the NNT of the set.",c:"Cochrane Handbook, ch. 6 and ch. 15."}}[ESTADO.d2];
+ V.push(V2);
+ const V3={A:{n:"m",t:"Unit-of-analysis error",q:"Mantel-Haenszel is a sound method, but you used the raw cells of a cluster-randomised trial. Haruna randomised 12 stroke units, not 760 independent patients: it carries less information than it appears to, and takes more weight than it deserves.",c:"Cochrane Handbook, ch. 23 (cluster-randomised trials)."},
+  B:{n:"m",t:"Unit-of-analysis error",q:"Inverse variance is a fine method, but the problem was never the weighting scheme: it was the denominator. With the raw cells, the cluster trial still counts for too much.",c:"Cochrane Handbook, ch. 23."},
+  C:{n:"b",t:"Unit of analysis dealt with",q:"Dividing the effective sample size by the design effect brings the cluster trial's weight down to what it should be, and leaves the rest of the analysis undistorted. The inverse-variance method allows this; Mantel-Haenszel, which takes only raw 2\u00d72 tables, does not.",c:"Cochrane Handbook, ch. 23; Egger 2022, ch. 9."},
+  D:{n:"r",t:"Solving it by exclusion",q:"Excluding the trial avoids the error, but throws away 760 patients when correcting its weight would have been enough. Acceptable as a sensitivity analysis, not as the main analysis.",c:"Cochrane Handbook, ch. 23."}}[ESTADO.d3];
+ V.push(V3);
+ const V4={A:{n:"m",t:"Fixed effect with substantial heterogeneity",q:"By keeping the fixed-effect model you assumed a single true effect when the data say otherwise. The confidence interval you reported is spuriously narrow, and the largest trial decides the result almost single-handedly.",c:"Cochrane Handbook, ch. 10; Egger 2022, ch. 9."},
+  B:{n:"b",t:"Model and report both right",q:"Random effects in the face of substantial heterogeneity, and a prediction interval so the reader can see where a future trial's effect would fall. The CI of the mean effect and the prediction interval answer different questions.",c:"Cochrane Handbook, ch. 10; IntHout et al., BMJ Open 2016;6:e010247."},
+  C:{n:"r",t:"Right model, incomplete report",q:"The random-effects model is the appropriate one, but without a prediction interval the reader sees only the precision of the mean and not the dispersion of the true effects, which is exactly what matters here.",c:"IntHout et al., BMJ Open 2016;6:e010247."},
+  D:{n:"m",t:"Exclusion driven by the result",q:"Removing the trials that lie furthest out until I\u00b2 comes down is letting the conclusion choose the data. Worse, the trials you excluded were precisely the intensive-protocol ones: you deleted the finding.",c:"Cochrane Handbook, ch. 10."},
+  E:{n:"m",t:"Refusing to pool",q:"A high I\u00b2 does not forbid pooling: it obliges you to explain. The heterogeneity in this set had an identifiable, prespecified cause, and a narrative synthesis leaves it undiscovered.",c:"Cochrane Handbook, ch. 10; Egger 2022, ch. 9."}}[ESTADO.d4];
+ V.push(V4);
+ const sgOK=(()=>{const x=resSub();return x&&x.grupos.length>1;})();
+ const V5={A:{n:"m",t:"No subgroup analysis",q:"With twelve trials power is limited, but the variable was prespecified and the heterogeneity was enormous. By not looking, you were left with an average that describes no patient.",c:"Cochrane Handbook, ch. 10."},
+  B:sgOK?{n:"b",t:"Prespecified subgroup",q:"You analysed the one variable that was in the protocol and that is, besides, a feature of the intervention rather than of the patients. The result splits the set in two: the high-intensity protocol and the moderate-intensity one, with I\u00b2 equal to zero inside each.",c:"Cochrane Handbook, ch. 10; Oxman & Guyatt, Ann Intern Med 1992;116:78-84."}
+  :{n:"r",t:"Right variable, impossible analysis",q:"You chose the right variable, but the set that reached this room no longer allowed the analysis: one of the two groups had fewer than two trials left after the exclusions made earlier. Your room 4 decision took the finding away before you could look for it.",c:"Cochrane Handbook, ch. 10."},
+  C:{n:"m",t:"Post hoc subgroup",q:"The journal a trial appears in is not a feature of the intervention or of the patients, and the variable was not prespecified. The difference you found is a false positive, and it also hides the variable that did explain the heterogeneity.",c:"Cochrane Handbook, ch. 10; Oxman & Guyatt, Ann Intern Med 1992;116:78-84."},
+  D:{n:"m",t:"Subgroup dredging",q:"Eight comparisons give roughly a 34 % chance of finding at least one \u2018significant\u2019 result even when no real difference exists. Keeping whichever one comes out is a guaranteed false positive.",c:"Cochrane Handbook, ch. 10."}}[ESTADO.d5];
+ V.push(V5);
+ const V6={A:{n:"m",t:"Asymmetry misattributed",q:"The funnel is asymmetric and Egger\u2019s test returns a small p value, but asymmetry has causes other than publication bias: here it comes from two different interventions being mixed together. Within each protocol the asymmetry disappears. Trim-and-fill imputes trials that never existed and \u2018corrects\u2019 an effect that was not biased.",c:"Cochrane Handbook, ch. 13; Sterne et al., BMJ 2011;343:d4002."},
+  B:{n:"m",t:"Dropping the inconvenient trial",q:"An influence analysis tells you whether the result depends on a single study; it is not a licence to remove it. Here, moreover, leaving out any one trial barely moves the effect: the heterogeneity came from the structure of the set, not from an outlier.",c:"Cochrane Handbook, ch. 10; Egger 2022, ch. 9."},
+  C:{n:"b",t:"Robustness handled well",q:"Repeating the analysis under the debatable decisions is what makes a result credible, and with twelve trials and the heterogeneity already explained by the protocol, funnel asymmetry cannot be read as publication bias.",c:"Cochrane Handbook, ch. 13; Sterne et al., BMJ 2011;343:d4002."},
+  D:{n:"r",t:"No robustness analysis",q:"Without checking, you cannot know whether your result hangs on one particular decision you made along the way. Not a methodological error as such, but it leaves the report unsupported.",c:"Cochrane Handbook, ch. 10."}}[ESTADO.d6];
+ V.push(V6);
+ const vioSplit=ESTADO.d5==="B";
+ const V7={A:{n:"m",t:"A recommendation built on an average",q:"The pooled effect is favourable, but it is the average of two different interventions: one that works and one that does not. Recommending it \u2018in general\u2019 means half of all patients receive a protocol with no benefit.",c:"Egger 2022, ch. 22 (GRADE)."},
+  B:{n:"m",t:"Blanket rejection",q:"Discarding the whole intervention also advises against the high-intensity protocol, which does reduce dependence consistently.",c:"Egger 2022, ch. 22."},
+  C:vioSplit?{n:"b",t:"A recommendation your report supports",q:"You separated the two protocols because your own prespecified analysis showed the split. That is what makes the recommendation defensible in front of a guideline panel.",c:"Cochrane Handbook, ch. 10; Egger 2022, ch. 22."}
+   :{n:"r",t:"Right recommendation, unsupported by your report",q:"The conclusion is the correct one, but nothing in your case file backs it: you never ran the intensity subgroup, so the difference between protocols appears nowhere in your work. A guideline panel would ask where it comes from, and you would have no answer.",c:"Cochrane Handbook, ch. 10."},
+  D:{n:"r",t:"Deferring the decision",q:"Twelve trials and more than 4,000 patients. The problem was never the amount of evidence but its interpretation: calling for more research here is a way of not answering the question.",c:"Egger 2022, ch. 22."}}[ESTADO.d7];
+ V.push(V7);
+ return V;
+}
+function grade(){
+ let n=4,bajadas=[];
+ const inc=incluidos();
+ if(ESTADO.crit.dis==="todos"){n--;bajadas.push(["Risk of bias","observational studies were included, carrying confounding by indication"]);}
+ else if(ESTADO.d3==="A"||ESTADO.d3==="B"){n--;bajadas.push(["Risk of bias","unit-of-analysis error in the cluster-randomised trial"]);}
+ const sgHecho=(()=>{const x=resSub();return ESTADO.d5==="B"&&x&&x.grupos.length>1;})();
+ if(!sgHecho){n--;bajadas.push(["Inconsistency","substantial heterogeneity left unexplained"]);}
+ else if(ESTADO.d4==="A"){n--;bajadas.push(["Inconsistency","heterogeneity not acknowledged by the model"]);}
+ if(ESTADO.crit.ini==="todos"||ESTADO.crit.des!=="mrs3"){n--;bajadas.push(["Indirectness","interventions or outcomes other than those of the question were mixed in"]);}
+ if(ESTADO.d4==="D"||ESTADO.d4==="E"){n--;bajadas.push(["Imprecision","the analysed set was reduced by decisions taken after seeing the results"]);}
+ if(ESTADO.d6==="A"){n--;bajadas.push(["Publication bias","a bias the data do not support was declared and the effect was adjusted for it"]);}
+ if(ESTADO.d6==="B"){n--;bajadas.push(["Publication bias","an analysis with a post hoc trial exclusion was reported as the main result"]);}
+ n=Math.max(1,n);
+ return {n,etiqueta:["","very low","low","moderate","high"][n],bajadas};
+}
+function informe(){
+ const meas=measActual(),rows=filasAnalisis(),m=meta(rows,meas),V=veredictos(),g=grade();
+ const graves=V.filter(v=>v.n==="m").length,reservas=V.filter(v=>v.n==="r").length;
+ let s=`<h2>Final report</h2><div class="barra"></div>`;
+ s+=`<div class="caja gris"><b>What lies underneath this case.</b> The twelve core trials were not evaluating one intervention but two.
+  Six applied a high-intensity protocol \u2014 repeated sitting and standing, several sessions a day \u2014 and consistently reduce dependence (RR \u2248 0.65, I\u00b2 = 0 %).
+  The other six, including the mega-trial MOVE-TRIAL, applied a moderate-intensity protocol and find no benefit (RR \u2248 1.03, I\u00b2 = 0 %).
+  The overall mean effect, around 0.83, describes no real patient: it is the average of two different things. The whole case was built so that this finding would surface, or not, depending on what you decided.</div>`;
+ s+=`<h3>Your result</h3><div class="res">
+  <div><b>Studies</b>${rows.length}</div><div><b>Measure</b>${MEAS[meas].n}</div>
+  <div><b>Model</b>${modelo()==="fijo"?"fixed":"random"} effects</div>
+  <div><b>Effect</b>${fx(modelo()==="fijo"?m.F:m.R,meas)} (${fci(modelo()==="fijo"?m.ciF:m.ciR,meas)})</div>
+  <div><b>I\u00b2</b>${m.I2.toFixed(0)} %</div></div>`;
+ s+=`<h3>The seven decisions</h3>`;
+ V.forEach((v,i)=>{s+=`<div class="ver ${v.n}"><div class="t">${SALAS[i].n}. ${v.t}</div><div class="q">${v.q}</div><div class="cita">${v.c}</div></div>`;});
+ s+=`<h3>Certainty of the evidence (GRADE)</h3>`;
+ s+=`<div class="caja">Starting point: <b>high</b> (randomised trials). ${g.bajadas.length?"Rated down for:":"Not rated down on any domain."}
+  <ul>${g.bajadas.map(b=>`<li><b>${b[0]}:</b> ${b[1]}</li>`).join("")}</ul>
+  Final certainty: <b>${g.etiqueta}</b>.</div>`;
+ if(graves===0&&reservas===0)s+=`<div class="ver b"><div class="t">Case file closed with no errors.</div><div class="q">All seven decisions hold up and the recommendation rests on your own analysis. This is the path expected of a methodologist.</div></div>`;
+ else if(graves===0)s+=`<div class="ver r"><div class="t">Case file valid, with reservations.</div><div class="q">Nothing here invalidates the meta-analysis, but ${reservas} decision${reservas>1?"s":""} would have to be defended in front of a reviewer. Worth walking the rooms again changing only those.</div></div>`;
+ else s+=`<div class="ver m"><div class="t">Case file not valid: ${graves} methodological error${graves>1?"s":""}.</div>
+   <div class="q">A meta-analysis with ${graves===1?"this error":"these errors"} cannot support a clinical recommendation. Go back to the start: you know which rooms you got wrong, but not what the right alternative was.</div></div>`;
+ s+=`<h3>Case file to hand in</h3>`;
+ const t=[];
+ t.push("MOVE CASE FILE \u2014 "+codigo());
+ t.push("Question: very early mobilisation (<24 h) vs. usual care in ischaemic stroke; mRS 3-6 at 3 months.");
+ t.push("");
+ t.push("Criteria: "+({eca:"RCTs only",todos:"RCTs and cohorts"})[ESTADO.crit.dis]+"; "+({"24":"started < 24 h",todos:"any timing"})[ESTADO.crit.ini]+"; "+({mrs3:"mRS 3-6 at 3 months",func:"any functional measure",clin:"any clinical outcome"})[ESTADO.crit.des]+" -> "+rows.length+" studies.");
+ t.push("Measure: "+MEAS[meas].largo+". Model: "+(modelo()==="fijo"?"fixed":"random")+" effects.");
+ t.push("Result: "+fx(modelo()==="fijo"?m.F:m.R,meas)+" (95 % CI "+fci(modelo()==="fijo"?m.ciF:m.ciR,meas)+"); I2 = "+m.I2.toFixed(0)+" %; tau2 = "+m.tau2.toFixed(3)+".");
+ if(ESTADO.d4==="B")t.push("95 % prediction interval: "+fci(m.IP,meas)+".");
+ t.push("");
+ V.forEach((v,i)=>{t.push(SALAS[i].n+" \u2014 "+SALAS[i].t+": "+({b:"CORRECT",r:"WITH RESERVATIONS",m:"ERROR"})[v.n]+". "+v.t);});
+ t.push("");
+ t.push("GRADE certainty: "+g.etiqueta+(g.bajadas.length?" (rated down for "+g.bajadas.map(b=>b[0].toLowerCase()).join(", ")+")":""));
+ t.push("Verdict: "+(graves===0&&reservas===0?"case file closed with no errors":graves===0?"valid with reservations":"not valid, "+graves+" methodological error(s)"));
+ s+=`<textarea id="informe" readonly>${t.join("\n")}</textarea>
+  <p class="noimp"><button id="copiar" class="sec">copy the report</button>
+   <button id="imprimir" class="sec">print or save as PDF</button>
+   <button id="reintentar">back to the start</button></p>`;
+ return s;
+}
+
+/* ============================ CODE AND STARTUP ============================ */
+function codigo(){
+ const c=ESTADO.crit;
+ const l1=(c.dis==="eca"&&c.ini==="24"&&c.des==="mrs3")?"B":(c.dis==="todos"?"A":"C");
+ const ls=[ESTADO.sala>0?l1:null,ESTADO.d2,ESTADO.d3,ESTADO.d4,ESTADO.d5,ESTADO.d6,ESTADO.d7]
+   .map(x=>x||"·").join("");
+ let chk=0;for(let i=0;i<ls.length;i++)chk+=ls.charCodeAt(i)*(i+2);
+ return "MOVE-"+ls+"-"+(chk%10);
+}
+function actualizaCodigo(){document.getElementById("codigo").textContent=codigo();}
+function reset(){ESTADO={sala:0,crit:{...CRIT_DEF},d1:null,d2:null,d3:null,d4:null,d5:null,d6:null,d7:null,prof:ESTADO.prof};
+ window.scrollTo(0,0);render();}
+document.getElementById("swProf").addEventListener("change",e=>{ESTADO.prof=e.target.checked;render();});
+document.getElementById("reiniciar").addEventListener("click",e=>{e.preventDefault();reset();});
+cargar();
+if(new URLSearchParams(location.search).get("teacher")==="1")ESTADO.prof=true;
+document.getElementById("swProf").checked=ESTADO.prof;
+render();
+</script>
+</body>
+</html>
