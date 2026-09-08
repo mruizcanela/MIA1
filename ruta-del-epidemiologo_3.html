@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La ruta del epidemiólogo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  --papel:#f6f7f6;
+  --papel-2:#ffffff;
+  --papel-3:#eceeed;
+  --tinta:#151a19;
+  --tinta-2:#4b5350;
+  --tinta-3:#79817e;
+  --linea:#d5d9d7;
+  --linea-fuerte:#b6bcb9;
+  --carmin:#a31621;
+  --carmin-suave:#f3dcdd;
+  --indigo:#25497a;
+  --indigo-suave:#dfe6f0;
+  --acierto:#1f6b4a;
+  --acierto-suave:#dcebe3;
+  --fallo:#8a5a00;
+  --fallo-suave:#f6e9cf;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --sombra:0 1px 2px rgba(20,26,24,.06),0 6px 20px rgba(20,26,24,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --papel:#121615;--papel-2:#1a1f1e;--papel-3:#232928;
+    --tinta:#e9ecea;--tinta-2:#b0b7b4;--tinta-3:#868e8b;
+    --linea:#2f3634;--linea-fuerte:#495150;
+    --carmin:#e4707a;--carmin-suave:#3a1f22;
+    --indigo:#8fb2dd;--indigo-suave:#1c2a3c;
+    --acierto:#6cc199;--acierto-suave:#1b2f26;
+    --fallo:#d9a441;--fallo-suave:#2e2716;
+    --sombra:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --papel:#121615;--papel-2:#1a1f1e;--papel-3:#232928;
+  --tinta:#e9ecea;--tinta-2:#b0b7b4;--tinta-3:#868e8b;
+  --linea:#2f3634;--linea-fuerte:#495150;
+  --carmin:#e4707a;--carmin-suave:#3a1f22;
+  --indigo:#8fb2dd;--indigo-suave:#1c2a3c;
+  --acierto:#6cc199;--acierto-suave:#1b2f26;
+  --fallo:#d9a441;--fallo-suave:#2e2716;
+  --sombra:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}
+
+*{box-sizing:border-box}
+body{background:var(--papel);color:var(--tinta);font-family:var(--sans);
+  font-size:16px;line-height:1.55;margin:0;padding:0 20px 72px;-webkit-font-smoothing:antialiased}
+.envoltorio{max-width:860px;margin:0 auto}
+
+header.cab{padding:38px 0 0}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-3);font-weight:700;margin:0 0 10px}
+h1{font-family:var(--serif);font-weight:700;font-size:38px;line-height:1.1;margin:0 0 12px;text-wrap:balance;letter-spacing:-.01em}
+.barra-roja{height:3px;width:64px;background:var(--carmin);margin:0 0 18px}
+.entradilla{font-family:var(--serif);font-size:18px;color:var(--tinta-2);max-width:64ch;margin:0 0 6px}
+
+/* ---------- tablero ---------- */
+.tablero{margin:26px 0 0}
+.tablero svg{display:block;width:100%;height:auto}
+.leyenda{display:flex;gap:22px;flex-wrap:wrap;margin-top:6px;font-size:12px;color:var(--tinta-3)}
+.leyenda span{display:flex;align-items:center;gap:7px;font-weight:600;letter-spacing:.02em}
+.leyenda i{width:22px;height:0;border-top:2px solid currentColor;display:inline-block}
+.leyenda .la{color:var(--indigo)}
+.leyenda .lb{color:var(--carmin)}
+
+.marcador{display:flex;flex-wrap:wrap;gap:22px;margin:22px 0 0;padding:14px 0;
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea)}
+.marcador div{display:flex;flex-direction:column;gap:1px}
+.marcador .rot{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta-3);font-weight:700}
+.marcador .val{font-family:var(--serif);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.15}
+
+/* ---------- tarjeta ---------- */
+.tarjeta{background:var(--papel-2);border:1px solid var(--linea);box-shadow:var(--sombra);padding:26px 26px 24px;margin-top:26px}
+.tarjeta-cab{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.sello{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border:1px solid var(--linea-fuerte);color:var(--tinta-2)}
+.sello.a{border-color:var(--indigo);color:var(--indigo);background:var(--indigo-suave)}
+.sello.b{border-color:var(--carmin);color:var(--carmin);background:var(--carmin-suave)}
+.avance{font-size:12.5px;color:var(--tinta-3);font-weight:600;letter-spacing:.02em}
+.enunciado{font-family:var(--serif);font-size:20px;line-height:1.42;margin:0 0 18px;text-wrap:pretty}
+.enunciado code{font-family:var(--sans);font-weight:600;background:var(--papel-3);padding:1px 5px;font-size:.92em}
+
+.opciones{display:flex;flex-direction:column;gap:8px}
+button.opcion{font-family:var(--sans);font-size:15.5px;line-height:1.4;text-align:left;
+  background:var(--papel-2);color:var(--tinta);border:1px solid var(--linea);padding:11px 14px;cursor:pointer;
+  display:flex;gap:11px;align-items:flex-start;width:100%;transition:border-color .12s,background .12s}
+button.opcion:hover:not(:disabled){border-color:var(--tinta-2);background:var(--papel-3)}
+button.opcion:focus-visible{outline:2px solid var(--carmin);outline-offset:2px}
+button.opcion .letra{font-weight:700;color:var(--tinta-3);flex:0 0 auto;font-variant-numeric:tabular-nums}
+button.opcion:disabled{cursor:default;opacity:.75}
+button.opcion.buena{border-color:var(--acierto);background:var(--acierto-suave);opacity:1}
+button.opcion.buena .letra{color:var(--acierto)}
+button.opcion.mala{border-color:var(--fallo);background:var(--fallo-suave);opacity:1}
+button.opcion.mala .letra{color:var(--fallo)}
+
+.veredicto{margin-top:18px;border-left:3px solid var(--linea-fuerte);padding:2px 0 2px 14px}
+.veredicto.ok{border-left-color:var(--acierto)}
+.veredicto.ko{border-left-color:var(--fallo)}
+.veredicto h3{font-family:var(--sans);font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px;color:var(--tinta-3)}
+.veredicto.ok h3{color:var(--acierto)}
+.veredicto.ko h3{color:var(--fallo)}
+.veredicto p{margin:0 0 8px;font-size:15.5px;color:var(--tinta-2);line-height:1.5}
+.veredicto p:last-child{margin-bottom:0}
+.fuente{font-size:13px;color:var(--tinta-3);font-style:italic}
+
+.acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;align-items:center}
+button.btn{font-family:var(--sans);font-size:14px;font-weight:600;letter-spacing:.02em;padding:10px 18px;
+  border:1px solid var(--tinta);background:var(--tinta);color:var(--papel-2);cursor:pointer;transition:opacity .12s}
+button.btn:hover{opacity:.85}
+button.btn:focus-visible{outline:2px solid var(--carmin);outline-offset:2px}
+button.btn.fantasma{background:transparent;color:var(--tinta);border-color:var(--linea-fuerte)}
+button.btn.fantasma:hover{border-color:var(--tinta)}
+button.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ---------- elección de senda ---------- */
+.sendas{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px}
+@media (max-width:620px){.sendas{grid-template-columns:1fr}}
+button.senda{
+  font-family:var(--sans);text-align:left;background:var(--papel-2);color:var(--tinta);
+  border:1px solid var(--linea);border-top-width:3px;padding:18px 18px 16px;cursor:pointer;
+  display:flex;flex-direction:column;gap:8px;transition:border-color .12s,background .12s}
+button.senda.a{border-top-color:var(--indigo)}
+button.senda.b{border-top-color:var(--carmin)}
+button.senda:hover{background:var(--papel-3)}
+button.senda:focus-visible{outline:2px solid var(--carmin);outline-offset:2px}
+button.senda .tit{font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.2}
+button.senda .sub{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+button.senda.a .sub{color:var(--indigo)}
+button.senda.b .sub{color:var(--carmin)}
+button.senda .txt{font-size:14.5px;color:var(--tinta-2);line-height:1.45}
+
+/* ---------- ficha de artículo ---------- */
+.ficha-art{background:var(--papel-3);border:1px solid var(--linea);padding:18px 20px;margin:0 0 20px}
+.ficha-art h4{font-family:var(--sans);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--carmin);margin:0 0 8px}
+.ficha-art .cita{font-family:var(--serif);font-size:17px;font-weight:600;margin:0 0 10px;line-height:1.35}
+.ficha-art ul{margin:0;padding-left:18px;font-size:15px;color:var(--tinta-2)}
+.ficha-art li{margin-bottom:5px}
+.ficha-art li:last-child{margin-bottom:0}
+.ficha-art .doi{font-size:13px;color:var(--tinta-3);margin:10px 0 0}
+.paso-reto{font-size:12px;color:var(--tinta-3);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:0 0 10px}
+
+/* ---------- informe ---------- */
+.informe h2{font-family:var(--serif);font-size:28px;margin:0 0 6px}
+.diploma{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin:6px 0 4px}
+.diploma svg{width:170px;height:auto;flex:0 0 auto}
+.resumen-tabla{width:100%;border-collapse:collapse;margin:18px 0;font-size:15px}
+.resumen-tabla th,.resumen-tabla td{text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid var(--linea)}
+.resumen-tabla th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta-3)}
+.resumen-tabla td.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:0}
+.codigo{font-family:var(--sans);font-weight:700;font-size:22px;letter-spacing:.1em;background:var(--papel-3);
+  border:1px dashed var(--linea-fuerte);padding:14px 18px;text-align:center;margin:18px 0 8px;
+  font-variant-numeric:tabular-nums;overflow-x:auto}
+.repaso{border:1px solid var(--linea);border-left:3px solid var(--carmin);background:var(--papel-3);padding:18px 20px;margin:24px 0 0}
+.repaso h3{font-family:var(--sans);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--carmin);margin:0 0 12px}
+.repaso ol{margin:0;padding-left:20px}
+.repaso li{margin-bottom:14px}
+.repaso li:last-child{margin-bottom:0}
+.repaso li strong{font-family:var(--serif);font-size:17px;font-weight:600}
+.repaso .cuenta{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--tinta-3);font-weight:700;margin-left:8px}
+.repaso p{margin:5px 0 0;font-size:15px;color:var(--tinta-2);line-height:1.5}
+.repaso.limpio{border-left-color:var(--acierto)}
+.repaso.limpio h3{color:var(--acierto)}
+.pie{margin-top:40px;padding-top:16px;border-top:1px solid var(--linea);font-size:13px;color:var(--tinta-3)}
+.pie p{margin:0 0 10px}
+@media print{body{background:#fff;color:#000;padding:0}.no-imprimir{display:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:560px){h1{font-size:30px}.enunciado{font-size:18px}.tarjeta{padding:20px 18px}.marcador{gap:16px}}
+</style>
+
+</head>
+<body>
+<div class="envoltorio">
+  <header class="cab">
+    <p class="eyebrow">Medicina Basada en la Evidencia · 4.º de Medicina</p>
+    <h1>La ruta del epidemiólogo</h1>
+    <div class="barra-roja"></div>
+    <p class="entradilla">Tres etapas hasta la meta. En cada una eliges entre la senda de preguntas cortas, que repasa lo básico casilla a casilla en seis paradas rápidas, y la senda del artículo, que cubre la etapa entera de un salto pero exige leer un estudio real y responder a tres preguntas encadenadas. Las dos sendas pasan por artículos. Fallar no te hace retroceder: te deja donde estabas. El marcador es el número de tiradas.</p>
+  </header>
+
+  <section class="tablero" aria-label="Tablero de la ruta">
+    <div id="tableroSvg"></div>
+    <div class="leyenda">
+      <span class="la"><i></i>Senda de preguntas cortas · 6 paradas</span>
+      <span class="lb"><i></i>Senda del artículo · 1 salto</span>
+    </div>
+  </section>
+
+  <div class="marcador" id="marcador"></div>
+  <main id="escena"></main>
+
+  <div class="pie no-imprimir">
+    <p>Las fichas de artículo describen estudios reales con sus cifras publicadas; el resto de datos numéricos son inventados para el ejercicio.</p>
+    <p><button class="btn fantasma" id="btnReiniciar" style="font-size:13px;padding:6px 12px">Empezar de nuevo</button></p>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ==========================================================
+   1. PREGUNTAS CORTAS DE REPASO  (senda de preguntas cortas, paradas 1-5)
+   ========================================================== */
+var PREGUNTAS = [
+
+/* ---------- DISEÑOS ---------- */
+{b:"disenos",t:"D-ident",q:"Se parte de si las personas están expuestas o no y se las sigue en el tiempo hasta ver quién enferma. ¿Qué diseño es?",
+ o:["Estudio de cohortes","Casos y controles","Transversal","Ecológico"],c:0,
+ e:"La dirección es exposición → enfermedad, y el investigador solo observa. Es una cohorte."},
+
+{b:"disenos",t:"D-ident",q:"Se seleccionan enfermos y sanos y se les pregunta por la exposición pasada. ¿Qué diseño es?",
+ o:["Casos y controles","Cohortes","Transversal","Ensayo clínico"],c:0,
+ e:"Se parte de la enfermedad y se mira hacia atrás. Esa dirección define el caso-control."},
+
+{b:"disenos",t:"D-ident",q:"Se miden la exposición y la enfermedad a la vez, en un solo momento. ¿Qué diseño es?",
+ o:["Transversal","Cohortes","Casos y controles","Ensayo clínico"],c:0,
+ e:"Una sola foto: no permite saber qué vino antes. Por eso da prevalencia y no incidencia."},
+
+{b:"disenos",t:"D-ident",q:"El investigador asigna el tratamiento al azar. ¿Qué diseño es?",
+ o:["Ensayo clínico aleatorizado","Cohorte prospectiva","Estudio cuasiexperimental","Transversal"],c:0,
+ e:"Asignar la exposición lo hace experimental; hacerlo al azar, aleatorizado."},
+
+{b:"disenos",t:"D-ident",q:"Se comparan el consumo medio de sal de 20 países con sus tasas de ictus. ¿Qué diseño es?",
+ o:["Ecológico","Transversal","Cohortes","Casos y controles"],c:0,
+ e:"La unidad de análisis es la población, no la persona. De ahí el riesgo de falacia ecológica."},
+
+{b:"disenos",t:"D-elec",q:"Para una enfermedad muy rara, ¿qué diseño observacional es más eficiente?",
+ o:["Casos y controles","Cohortes","Transversal","Ecológico"],c:0,
+ e:"Se arranca de los casos ya ocurridos, en vez de esperar a que aparezcan en una cohorte enorme."},
+
+{b:"disenos",t:"D-elec",q:"Para una exposición muy rara (por ejemplo, un tóxico laboral), ¿qué diseño conviene?",
+ o:["Cohortes","Casos y controles","Transversal","Serie de casos"],c:0,
+ e:"Se va a buscar directamente a los expuestos y se los sigue. En un caso-control casi nadie estaría expuesto."},
+
+{b:"disenos",t:"M-frec",q:"¿Qué diseños permiten calcular la incidencia?",
+ o:["Cohortes y ensayos clínicos","Casos y controles y transversales","Solo los transversales","Todos los observacionales"],c:0,
+ e:"Hace falta partir de personas sanas y seguirlas en el tiempo."},
+
+{b:"disenos",t:"D-jerar",q:"Un artículo describe la evolución de 15 pacientes tratados con una técnica nueva, sin grupo de comparación. ¿Qué es?",
+ o:["Serie de casos","Cohorte pequeña","Ensayo no aleatorizado","Estudio transversal"],c:0,
+ e:"Sin grupo de comparación no hay medida de asociación posible: solo describe y sugiere hipótesis."},
+
+{b:"disenos",t:"M-frec",q:"¿Qué medida de frecuencia se obtiene de un estudio transversal?",
+ o:["Prevalencia","Incidencia acumulada","Densidad de incidencia","Riesgo relativo"],c:0,
+ e:"Cuenta los casos existentes en un momento dado, no los nuevos."},
+
+{b:"disenos",t:"D-jerar",q:"¿Qué diseño ocupa el nivel de evidencia más alto para evaluar la eficacia de un tratamiento?",
+ o:["Ensayo clínico aleatorizado","Cohorte prospectiva","Casos y controles","Serie de casos"],c:0,
+ e:"Por encima solo están las revisiones sistemáticas y los metaanálisis de esos ensayos."},
+
+{b:"disenos",t:"D-ident",q:"Una cohorte que reconstruye la exposición a partir de historias antiguas, ¿deja de ser una cohorte?",
+ o:["No: lo que la define es la dirección exposición → enfermedad","Sí: pasa a ser un caso-control","Sí: pasa a ser un transversal","Solo si no hay grupo no expuesto"],c:0,
+ e:"El diseño lo marca la dirección del razonamiento, no cuándo se recogieron los datos. Es una cohorte histórica o retrospectiva."},
+
+/* ---------- MEDIDAS ---------- */
+{b:"medidas",t:"M-calc",q:"En una cohorte enferman 30 de 300 expuestos y 20 de 400 no expuestos. ¿Cuál es el riesgo relativo?",
+ o:["2,0","1,5","0,5","3,0"],c:0,
+ e:"0,10 dividido entre 0,05 = 2. El riesgo se duplica en los expuestos."},
+
+{b:"medidas",t:"M-calc",q:"Caso-control: 60 casos expuestos y 40 no; 30 controles expuestos y 70 no. ¿Cuál es la odds ratio?",
+ o:["3,5","1,5","2,0","0,29"],c:0,
+ e:"Producto cruzado: (60 × 70) / (40 × 30) = 3,5."},
+
+{b:"medidas",t:"M-interp",q:"Un riesgo relativo de 1 significa que…",
+ o:["El riesgo es igual en expuestos y no expuestos","La exposición protege","El estudio no tiene potencia","El resultado no es significativo"],c:0,
+ e:"1 es el valor nulo en la escala multiplicativa. Que sea significativo o no lo dice el intervalo de confianza."},
+
+{b:"medidas",t:"M-interp",q:"Un riesgo relativo de 0,60 indica que la exposición es…",
+ o:["Un factor protector","Un factor de riesgo","Irrelevante","Un factor de confusión"],c:0,
+ e:"Por debajo de 1, el riesgo es menor en los expuestos: reducción del 40 %."},
+
+{b:"medidas",t:"M-interp",q:"¿Cuál es el valor nulo en la escala aditiva (diferencia de riesgos)?",
+ o:["0","1","0,5","Depende del riesgo basal"],c:0,
+ e:"En la escala aditiva se restan riesgos y no haber diferencia es restar cero; en la multiplicativa se dividen y el nulo es 1."},
+
+{b:"medidas",t:"M-interp",q:"Un ensayo da un RR de 0,78 con IC 95 % de 0,61 a 1,00. ¿Cómo se interpreta?",
+ o:["Reducción del 22 %, pero compatible con el valor nulo","Reducción del 22 % estadísticamente significativa","Ausencia total de efecto","Reducción del 78 %"],c:0,
+ e:"El intervalo toca el 1, así que los datos también son compatibles con la ausencia de efecto."},
+
+{b:"medidas",t:"M-calc",q:"¿Cuándo se parece la odds ratio al riesgo relativo?",
+ o:["Cuando la enfermedad es poco frecuente","Siempre","Cuando la muestra es grande","Solo en los ensayos clínicos"],c:0,
+ e:"Con desenlaces raros, odds y riesgos casi coinciden. Con desenlaces frecuentes la OR exagera la asociación."},
+
+{b:"medidas",t:"M-abs",q:"El evento ocurre en el 12 % del grupo control y en el 8 % del tratado. ¿Cuál es el NNT?",
+ o:["25","4","12","8"],c:0,
+ e:"Reducción absoluta = 4 % = 0,04. NNT = 1/0,04 = 25."},
+
+{b:"medidas",t:"M-abs",q:"Con un RR de 0,75, ¿cuál es la reducción relativa del riesgo?",
+ o:["25 %","75 %","0,25 casos por persona","Depende del riesgo basal"],c:0,
+ e:"RRR = 1 − RR. La reducción absoluta, en cambio, sí depende del riesgo basal."},
+
+{b:"medidas",t:"M-calc",q:"¿Cuál es la medida de asociación propia de un estudio de casos y controles?",
+ o:["La odds ratio","El riesgo relativo","La diferencia de riesgos","La densidad de incidencia"],c:0,
+ e:"El investigador fija cuántos casos y controles incluye, así que no hay incidencia estimable."},
+
+{b:"medidas",t:"M-frec",q:"En un municipio de 5.000 habitantes hay hoy 340 personas con diabetes. Esa cifra es…",
+ o:["La prevalencia","La incidencia acumulada","La densidad de incidencia","El riesgo atribuible"],c:0,
+ e:"Casos existentes en un momento dado. La incidencia contaría solo casos nuevos entre personas sanas al inicio."},
+
+{b:"medidas",t:"M-abs",q:"La diferencia de riesgos entre expuestos y no expuestos se llama…",
+ o:["Riesgo atribuible (reducción o exceso absoluto)","Riesgo relativo","Odds ratio","Razón de prevalencias"],c:0,
+ e:"Es la medida en escala aditiva, y de ella sale el NNT."},
+
+/* ---------- SESGOS ---------- */
+{b:"sesgos",t:"S-inf",q:"En un caso-control, las madres de niños con malformaciones recuerdan mejor los fármacos del embarazo. ¿Qué sesgo es?",
+ o:["Sesgo de memoria","Sesgo de selección","Confusión","Sesgo de adelanto diagnóstico"],c:0,
+ e:"Es un sesgo de información: el error al medir la exposición depende de si eres caso o control."},
+
+{b:"sesgos",t:"S-sel",q:"En un ensayo se pierden el 8 % del grupo control y el 31 % del de intervención. ¿Qué amenaza el resultado?",
+ o:["Sesgo por pérdidas en el seguimiento (desgaste)","Sesgo de memoria","Confusión por indicación","Sesgo de publicación"],c:0,
+ e:"Las pérdidas desiguales rompen la comparabilidad que había dado la aleatorización."},
+
+{b:"sesgos",t:"S-sel",q:"Los controles de un caso-control se eligen entre ingresados por otras enfermedades también ligadas al tabaco. ¿Qué ocurre?",
+ o:["Sesgo de selección: no representan la exposición de la población","Sesgo de memoria","Modificación del efecto","Nada: son los controles ideales"],c:0,
+ e:"Si los controles están sobreexpuestos, la asociación se acerca artificialmente al valor nulo."},
+
+{b:"sesgos",t:"S-conf",q:"¿Qué debe cumplir una variable para ser un factor de confusión?",
+ o:["Asociarse a la exposición y ser factor de riesgo del desenlace, sin ser un paso intermedio","Ser frecuente y estar mal medida","Tener efectos distintos en cada subgrupo","Estar desequilibrada tras la aleatorización"],c:0,
+ e:"Las tres condiciones a la vez. La tercera es la más olvidada: ajustar por un eslabón intermedio borra parte del efecto."},
+
+{b:"sesgos",t:"S-conf",q:"¿Qué estrategia controla la confusión por variables que no se han medido?",
+ o:["La aleatorización","El ajuste multivariante","La estratificación","El apareamiento"],c:0,
+ e:"Las otras tres solo pueden manejar lo que se ha medido. Por eso el ensayo es el diseño con menos confusión."},
+
+{b:"sesgos",t:"S-sel",q:"Los trabajadores de una fábrica tienen menos mortalidad que la población general. ¿Qué lo explica mejor?",
+ o:["El efecto del trabajador sano","Que la exposición protege","Un sesgo de memoria","Modificación del efecto"],c:0,
+ e:"Para trabajar hay que estar sano: se comparan dos poblaciones distintas de partida. Es un sesgo de selección."},
+
+{b:"sesgos",t:"S-inf",q:"Un cuestionario clasifica mal la exposición por igual en enfermos y sanos. ¿Qué efecto tiene?",
+ o:["Diluye la asociación: la acerca al valor nulo","La exagera","No tiene ningún efecto","Puede ir en cualquier dirección"],c:0,
+ e:"Es el error de clasificación no diferencial: mezcla los grupos y los aproxima."},
+
+{b:"sesgos",t:"S-conf",q:"Un fármaco parece aumentar la mortalidad porque se reserva a los pacientes más graves. ¿Qué es?",
+ o:["Confusión por indicación","Sesgo de memoria","Sesgo de detección","Modificación del efecto"],c:0,
+ e:"La gravedad determina a la vez quién recibe el fármaco y quién muere: es una variable de confusión."},
+
+{b:"sesgos",t:"S-crib",q:"Con el cribado, el paciente vive más años desde el diagnóstico pero muere el mismo día que habría muerto. ¿Qué sesgo es?",
+ o:["Sesgo de adelanto diagnóstico","Sesgo de memoria","Sesgo del voluntario","Confusión"],c:0,
+ e:"Por eso los programas de cribado se evalúan con mortalidad, no con supervivencia desde el diagnóstico."},
+
+{b:"sesgos",t:"S-sel",q:"Quienes se apuntan voluntariamente a un programa preventivo están más sanos de partida. ¿Qué sesgo es?",
+ o:["Sesgo del voluntario (autoselección)","Sesgo de información","Efecto placebo","Confusión por indicación"],c:0,
+ e:"Es un sesgo de selección, y explica muchos resultados espectaculares de intervenciones no aleatorizadas."},
+
+{b:"sesgos",t:"S-crib",q:"Se observa que las personas con colesterol más bajo mueren más de cáncer. ¿Qué hay que descartar antes que nada?",
+ o:["Causalidad inversa: el cáncer no diagnosticado baja el colesterol","Sesgo de memoria","Modificación del efecto","Sesgo de publicación"],c:0,
+ e:"La enfermedad preclínica puede modificar la exposición medida. Se explora excluyendo los primeros años de seguimiento."},
+
+{b:"sesgos",t:"S-conf",q:"El tratamiento funciona en menores de 65 años (RR 0,50) y no en mayores (RR 1,05). ¿Qué es?",
+ o:["Modificación del efecto: hay que presentar los resultados por separado","Confusión por edad: hay que ajustar y dar un solo valor","Un hallazgo casual que debe ignorarse","Un fallo de la aleatorización"],c:0,
+ e:"La confusión es una distorsión que se corrige; la modificación del efecto es un hallazgo real que se describe."}
+];
+/* ==========================================================
+   2. ARTÍCULOS
+   ========================================================== */
+var FICHAS = {
+ doll:{
+  titulo:"Doll R, Hill AB. A study of the aetiology of carcinoma of the lung. BMJ 1952;2:1271-86.",
+  datos:[
+   "Pacientes ingresados en hospitales de Londres y otras ciudades inglesas entre 1948 y 1952.",
+   "1.465 pacientes con carcinoma de pulmón y 1.465 pacientes de comparación, cada uno elegido en el mismo hospital y emparejado por sexo y grupo quinquenal de edad; tenían cáncer de estómago, cáncer de colon u otras enfermedades no tumorales.",
+   "Entre los 1.357 varones con cáncer de pulmón había 7 no fumadores (0,5 %); entre los 1.357 varones de comparación, 61 (4,5 %).",
+   "Fumaban 25 o más cigarrillos diarios el 25 % de los casos frente al 13,4 % de los controles.",
+   "Los entrevistadores no conocían el diagnóstico. Cuando un paciente entrevistado como caso resultaba después no tener cáncer, sus respuestas se parecían a las de los controles."
+  ],
+  doi:"Reproducido en The Milbank Quarterly 31(3)."
+ },
+ britdoc:{
+  titulo:"Doll R, Hill AB. Estudio de los médicos británicos (British Doctors Study), iniciado en 1951.",
+  datos:[
+   "En octubre de 1951 se envió un cuestionario sobre hábito tabáquico a todos los médicos colegiados del Reino Unido.",
+   "De 59.600 cuestionarios enviados, 40.701 fueron suficientemente completos para el análisis (34.494 varones y 6.207 mujeres).",
+   "Se enviaron cuestionarios de seguimiento en 1957, 1966, 1971, 1978, 1991, 1998 y 2001, y se registró la mortalidad por causa a lo largo de más de cincuenta años.",
+   "Los primeros resultados sobre cáncer de pulmón se publicaron en 1954 y los de infarto y EPOC en 1956."
+  ],
+  doi:"Clinical Trial Service Unit, Universidad de Oxford."
+ },
+ cuatroS:{
+  titulo:"Scandinavian Simvastatin Survival Study Group. Randomised trial of cholesterol lowering in 4444 patients with coronary heart disease (4S). Lancet 1994;344:1383-9.",
+  datos:[
+   "Ensayo aleatorizado, doble ciego y controlado con placebo en 94 centros escandinavos.",
+   "4.444 pacientes con cardiopatía isquémica asignados a simvastatina 20-40 mg/día o placebo. Mediana de seguimiento 5,4 años.",
+   "Mortalidad total: 256 muertes (12 %) con placebo y 182 (8 %) con simvastatina. Riesgo relativo 0,70 (IC 95 % 0,58-0,85; p = 0,0003).",
+   "Eventos coronarios mayores: 622 pacientes (28 %) con placebo y 431 (19 %) con simvastatina. Riesgo relativo 0,66 (IC 95 % 0,59-0,75; p < 0,00001)."
+  ],
+  doi:"Lancet 1994;344(8934):1383-1389."
+ },
+ whi:{
+  titulo:"Writing Group for the Women's Health Initiative Investigators. Risks and benefits of estrogen plus progestin in healthy postmenopausal women. JAMA 2002;288:321-33.",
+  datos:[
+   "16.608 mujeres posmenopáusicas asignadas al azar a estrógenos conjugados equinos 0,625 mg más acetato de medroxiprogesterona 2,5 mg al día (8.506) o placebo (8.102). Seguimiento medio 5,2 años; el ensayo se detuvo antes de lo previsto por exceso de daño.",
+   "Enfermedad coronaria HR 1,29 (IC 95 % nominal 1,02-1,63); cáncer de mama invasivo 1,26 (1,00-1,59); ictus 1,41 (1,07-1,85); embolia pulmonar 2,13 (1,39-3,25).",
+   "Cáncer colorrectal 0,63 (0,43-0,92); fractura de cadera 0,66 (0,45-0,98).",
+   "Exceso absoluto de 19 eventos por 10.000 mujeres-año en el índice global.",
+   "Los estudios observacionales previos habían encontrado de forma consistente MENOS enfermedad coronaria entre las usuarias de terapia hormonal."
+  ],
+  doi:"JAMA 2002;288(3):321-333."
+ },
+ predimed:{
+  titulo:"Estruch R, Ros E, Salas-Salvadó J, et al. Primary prevention of cardiovascular disease with a Mediterranean diet. N Engl J Med 2013;368:1279-90.",
+  datos:[
+   "7.447 participantes de alto riesgo cardiovascular sin enfermedad al inicio, asignados a dieta mediterránea con aceite de oliva virgen extra, dieta mediterránea con frutos secos, o consejo de dieta baja en grasa.",
+   "Desenlace principal combinado: infarto de miocardio, ictus o muerte cardiovascular. Mediana de seguimiento 4,8 años.",
+   "Eventos: 96 (3,8 %) con aceite, 83 (3,4 %) con frutos secos, 109 (4,4 %) en el control.",
+   "HR 0,70 (IC 95 % 0,54-0,92) para el aceite y 0,72 (0,54-0,96) para los frutos secos.",
+   "En 2018 el artículo fue retirado y republicado tras detectarse que en un centro se había asignado a la vez a todos los miembros de algunas familias y a poblados enteros, en lugar de individualmente."
+  ],
+  doi:"N Engl J Med 2013;368:1279-1290. Retirado y republicado en 2018 (NEJM 2018;378:e34)."
+ }
+};
+
+/* ---- Retos largos: senda del artículo (3 preguntas, salto de 6) ---- */
+var RETOS = {
+ disenos:{ficha:"doll", subs:[
+  {t:"D-elec",q:"El apareamiento se hizo por hospital, sexo y grupo de edad. ¿Qué consecuencia tiene sobre el análisis?",
+   o:["Esas variables quedan controladas pero ya no pueden estudiarse como factores de riesgo, y el análisis debe ser apareado","Ninguna: el análisis puede hacerse como si la muestra fuera independiente","Permite estimar el riesgo relativo además de la odds ratio","Elimina la necesidad de ajustar por cualquier otra variable"],c:0,
+   e:"Aparear equipara a casos y controles en esas variables, así que dejan de ser analizables y, además, obliga a un análisis que respete los pares (OR apareada, McNemar o regresión logística condicional). Analizar datos apareados como si fueran independientes sesga la estimación."},
+  {t:"S-sel",q:"Los controles eran pacientes hospitalizados por cáncer de estómago, cáncer de colon u otras enfermedades. ¿Cuál es la objeción metodológica y en qué dirección actuaría?",
+   o:["Si esas enfermedades también se asocian al tabaco, los controles están sobreexpuestos y la OR se acerca al valor nulo: el efecto se subestima","Los controles hospitalarios recuerdan peor, lo que exagera la asociación","No hay objeción: los controles hospitalarios son la referencia ideal","La OR se sobreestima, porque los ingresados fuman menos que la población"],c:0,
+   e:"Es el sesgo de Berkson. Con controles hospitalarios hay que elegir enfermedades no relacionadas con la exposición; si lo están, la comparación se contamina y el sesgo tira hacia el 1."},
+  {t:"S-inf",q:"La objeción de la época era que los enfermos de pulmón «buscaban una causa» y declaraban más tabaco. ¿Qué elemento del estudio permite rebatirla mejor?",
+   o:["Que los pacientes entrevistados como casos que después resultaron no tener cáncer declararon un consumo similar al de los controles","Que los entrevistadores estaban ciegos al diagnóstico","Que hay 1.465 pares, un tamaño muestral muy grande","Que existe una relación dosis-respuesta con el número de cigarrillos"],c:0,
+   e:"El cegamiento del entrevistador y la dosis-respuesta ayudan, pero no descartan que el enfermo recuerde de otro modo. La comparación con los falsos casos es la prueba directa: mismo estado de ánimo y misma entrevista, sin diagnóstico de cáncer, y las respuestas no cambian."}
+ ]},
+
+ medidas:{ficha:"cuatroS", subs:[
+  {t:"M-abs",q:"Con los datos de mortalidad total (12 % frente a 8 %), ¿cuáles son la reducción relativa, la reducción absoluta y el NNT a 5,4 años?",
+   o:["RRR 30 %, RAR 4 puntos porcentuales, NNT 25","RRR 4 %, RAR 30 %, NNT 4","RRR 33 %, RAR 4 %, NNT 30","RRR 30 %, RAR 30 %, NNT 3"],c:0,
+   e:"RRR = 1 − 0,70 = 30 %. RAR = 12 % − 8 % = 4 puntos porcentuales. NNT = 1/0,04 = 25 pacientes tratados durante 5,4 años para evitar una muerte."},
+  {t:"M-abs",q:"El RR de eventos coronarios mayores (0,66) es más favorable que el de mortalidad total (0,70) y, sin embargo, su NNT es mucho menor (28 % frente a 19 %: NNT ≈ 11). ¿Por qué?",
+   o:["Porque el NNT depende sobre todo del riesgo basal, que es mucho mayor para eventos coronarios que para la muerte","Porque el RR de eventos coronarios es estadísticamente más significativo","Porque los eventos coronarios se midieron con más precisión","Porque el NNT y el RR miden cosas incompatibles y no deben compararse"],c:0,
+   e:"Dos reducciones relativas casi idénticas producen NNT muy distintos si el riesgo de partida difiere. Es la razón por la que ningún NNT puede trasladarse de una población a otra sin recalcularlo."},
+  {t:"M-interp",q:"El intervalo de la mortalidad total es 0,58-0,85. ¿Qué afirmación es correcta?",
+   o:["Los datos son compatibles con reducciones de entre el 15 % y el 42 %, y el intervalo excluye el valor nulo","Hay un 95 % de probabilidad de que el RR verdadero sea 0,70","El 95 % de los pacientes obtuvo una reducción entre 0,58 y 0,85","El intervalo indica que el efecto es homogéneo entre subgrupos"],c:0,
+   e:"El intervalo se lee sobre el rango de valores compatibles con los datos: 1 − 0,85 = 15 % y 1 − 0,58 = 42 %. No es una distribución de probabilidad del parámetro ni describe la variabilidad entre pacientes."}
+ ]},
+
+ sesgos:{ficha:"whi", subs:[
+  {t:"S-conf",q:"Los estudios observacionales daban protección coronaria y el ensayo dio daño. ¿Cuál es la explicación principal?",
+   o:["Confusión residual por «usuaria sana»: quien tomaba hormonas tenía mejor nivel socioeconómico, más ejercicio y más contacto con el sistema sanitario","Los ensayos usan desenlaces distintos de los estudios observacionales","Sesgo de memoria en los estudios observacionales","Azar: con muchos estudios alguno tenía que discrepar"],c:0,
+   e:"Es el ejemplo canónico de confusión residual: ajustar por lo medido no bastó porque la indicación de la terapia hormonal iba unida a un conjunto de conductas y circunstancias favorables imposible de capturar por completo."},
+  {t:"M-interp",q:"Los autores llamaron «nominales» a los intervalos de confianza. ¿Qué querían señalar?",
+   o:["Que con múltiples desenlaces y análisis intermedios repetidos, los intervalos sin corregir subestiman la probabilidad de hallazgos falsos","Que los intervalos se calcularon sin ajustar por las variables basales","Que el tamaño muestral era insuficiente","Que se trata de intervalos bayesianos y no frecuentistas"],c:0,
+   e:"Al vigilar varios desenlaces varias veces a lo largo del ensayo, la probabilidad de cruzar el umbral por azar aumenta. De ahí la distinción entre intervalos nominales y ajustados por comparaciones múltiples."},
+  {t:"S-conf",q:"El ensayo se detuvo antes de lo previsto. ¿Qué precaución general exige la parada precoz al interpretar la magnitud del efecto?",
+   o:["Las paradas precoces guiadas por los datos tienden a captar un pico aleatorio, así que la magnitud estimada suele estar exagerada","Invalida el ensayo, que debe repetirse","Obliga a analizar por protocolo en lugar de por intención de tratar","Solo afecta a la validez externa"],c:0,
+   e:"Se detiene cuando el resultado cruza un umbral, y ese cruce es más probable en un momento de fluctuación favorable a la conclusión. Por eso los efectos de ensayos parados precozmente suelen atenuarse en réplicas posteriores; la dirección del hallazgo, en cambio, se mantuvo aquí en el seguimiento posterior."}
+ ]}
+};
+
+/* ---- Preguntas de artículo: senda de preguntas cortas, última parada ---- */
+var ART_CORTAS = {
+ disenos:[
+  {ficha:"britdoc",t:"D-ident",
+   q:"¿Qué diseño es y qué ventaja decisiva tiene frente al caso-control de 1952 para estudiar el tabaco?",
+   o:["Cohorte prospectiva: la exposición se registró antes de que apareciera ninguna enfermedad, lo que descarta el sesgo de memoria","Cohorte retrospectiva: los datos se reconstruyeron a partir de registros","Estudio transversal repetido: mide prevalencia en varios momentos","Casos y controles anidado: los casos surgen dentro de la cohorte"],c:0,
+   e:"El cuestionario de 1951 se respondió estando sanos, así que la declaración de tabaquismo no pudo estar influida por el diagnóstico. Es la respuesta directa a la principal objeción que se hacía al caso-control."},
+  {ficha:"britdoc",t:"S-sel",
+   q:"De 59.600 cuestionarios enviados solo 40.701 fueron analizables. ¿Qué amenaza plantea y por qué se considera limitada aquí?",
+   o:["Podría haber sesgo de selección, pero afecta sobre todo a la validez externa: la comparación interna entre fumadores y no fumadores de la cohorte sigue siendo válida","Invalida el estudio, porque la tasa de respuesta es inferior al 75 %","Produce sesgo de memoria en los no respondedores","Obliga a analizar los datos como un estudio transversal"],c:0,
+   e:"Una cohorte no tiene por qué ser representativa de la población para estimar bien una asociación interna; lo que exige es que la comparación entre expuestos y no expuestos dentro de ella no esté distorsionada."}
+ ],
+ medidas:[
+  {ficha:"predimed",t:"M-abs",
+   q:"Con los datos del grupo de aceite (3,8 %) frente al control (4,4 %), ¿cómo se relacionan el HR de 0,70 y la reducción absoluta observada?",
+   o:["La reducción absoluta es de 0,6 puntos porcentuales (NNT ≈ 167): un HR llamativo puede corresponder a un beneficio absoluto pequeño cuando el riesgo basal es bajo","La reducción absoluta es del 30 %, coherente con el HR","El HR y la reducción absoluta son numéricamente equivalentes","No pueden compararse porque el HR incorpora el tiempo"],c:0,
+   e:"4,4 % − 3,8 % = 0,6 puntos, es decir NNT ≈ 167 en casi cinco años. En prevención primaria, con riesgos basales bajos, las reducciones relativas grandes se traducen en beneficios absolutos modestos: por eso hay que comunicar siempre las dos cifras."},
+  {ficha:"whi",t:"M-abs",
+   q:"El estudio comunica un exceso de 19 eventos por 10.000 mujeres-año en el índice global. ¿Qué añade esa cifra a los hazard ratios?",
+   o:["Traslada el riesgo a la escala aditiva, que es la relevante para decidir en la consulta y para calcular el impacto poblacional","Es una forma equivalente de expresar el HR, sin información adicional","Corrige el efecto de las comparaciones múltiples","Indica la heterogeneidad entre los desenlaces del índice"],c:0,
+   e:"Los HR describen la fuerza de la asociación; el exceso absoluto describe cuántas mujeres se ven afectadas. Con desenlaces poco frecuentes, un HR de 1,29 puede significar muy pocos casos añadidos, y esa es la cifra que necesita la paciente."}
+ ],
+ sesgos:[
+  {ficha:"cuatroS",t:"S-conf",
+   q:"Un registro observacional compara la mortalidad de quienes toman estatinas y quienes no, y encuentra un beneficio aún mayor que el de 4S. ¿Cuál es la lectura correcta?",
+   o:["Es esperable que esté inflado: al beneficio real se suman la confusión por indicación y el efecto del cumplidor sano, que el ensayo elimina con la aleatorización","Confirma el resultado de 4S con mayor validez externa","Indica que el efecto de las estatinas crece fuera del contexto experimental","Es un caso de sesgo de memoria en el registro de la exposición"],c:0,
+   e:"Quien recibe y mantiene una estatina en la práctica clínica suele estar más controlado y cuidarse más. La comparación con el ensayo es justamente el modo de cuantificar cuánto de la asociación observacional era confusión."},
+  {ficha:"predimed",t:"S-conf",
+   q:"La irregularidad que llevó a la retirada fue que en un centro se asignó a familias y poblados enteros en vez de a individuos. ¿Por qué importa desde el punto de vista del análisis?",
+   o:["De hecho fue una aleatorización por conglomerados: las observaciones no son independientes y los intervalos calculados como si lo fueran son demasiado estrechos","Introduce sesgo de memoria en el registro dietético","Impide calcular el hazard ratio","Afecta solo a la validez externa, no a la interna"],c:0,
+   e:"Ignorar la correlación intraclase exagera la precisión: el tamaño muestral efectivo es menor que el número de participantes. En la republicación de 2018 esos participantes se excluyeron o se reanalizaron teniendo en cuenta la estructura de conglomerados."}
+ ]
+};
+
+/* ---- temas para el diagnóstico final ---- */
+var TEMAS = {
+ "D-ident":{n:"Identificar el diseño de un estudio",
+   c:"Repasa la regla de la dirección: de la exposición a la enfermedad es una cohorte; de la enfermedad hacia atrás, un caso-control; todo medido a la vez, un transversal; si el investigador asigna, es un ensayo. Que los datos sean antiguos no cambia el diseño."},
+ "D-elec":{n:"Elegir el diseño adecuado a la pregunta",
+   c:"Enfermedad rara, casos y controles; exposición rara, cohorte. Y recuerda qué implica aparear: lo que se aparea deja de poder estudiarse y obliga a un análisis por pares."},
+ "D-jerar":{n:"Jerarquía de la evidencia y estudios descriptivos",
+   c:"Sin grupo de comparación (serie de casos) no hay medida de asociación posible. Coloca cada diseño en la pirámide y ten claro para qué pregunta sirve cada uno."},
+ "M-frec":{n:"Medidas de frecuencia: prevalencia e incidencia",
+   c:"Prevalencia son casos existentes en un momento; incidencia, casos nuevos entre personas sanas seguidas en el tiempo. Solo cohortes y ensayos dan incidencia."},
+ "M-calc":{n:"Cálculo de RR y OR en la tabla 2×2",
+   c:"Practica las dos operaciones: el RR divide riesgos y la OR es el producto cruzado. Y ten claro por qué en el caso-control solo cabe la OR."},
+ "M-interp":{n:"Interpretación del valor nulo y del intervalo de confianza",
+   c:"El valor nulo es 1 en escala multiplicativa y 0 en la aditiva. Un intervalo que toca el 1 es compatible con la ausencia de efecto; el intervalo, no el valor p, es lo que hay que leer."},
+ "M-abs":{n:"Medidas absolutas: reducción absoluta y NNT",
+   c:"La reducción relativa sola engaña. Calcula siempre la diferencia de riesgos y el NNT (1 dividido entre esa diferencia): con riesgos basales bajos, un RR llamativo deja un beneficio absoluto pequeño."},
+ "S-sel":{n:"Sesgos de selección",
+   c:"Repasa quién entra y quién se queda fuera: controles hospitalarios, pérdidas desiguales en el seguimiento, voluntarios y efecto del trabajador sano. Todos comparan poblaciones que no eran comparables."},
+ "S-inf":{n:"Sesgos de información",
+   c:"Distingue el error de clasificación no diferencial, que diluye la asociación, del diferencial (sesgo de memoria), cuya dirección es impredecible."},
+ "S-conf":{n:"Confusión y modificación del efecto",
+   c:"Las tres condiciones de la confusión, incluida la de no ser un paso intermedio. La confusión es una distorsión que se corrige; la modificación del efecto es un hallazgo que se describe por subgrupos. Solo la aleatorización controla lo no medido."},
+ "S-crib":{n:"Cribado y causalidad inversa",
+   c:"El adelanto diagnóstico alarga la supervivencia sin retrasar la muerte: por eso el cribado se evalúa con mortalidad. Y ante una asociación rara, descarta primero que la enfermedad haya modificado la exposición."}
+};
+
+/* ==========================================================
+   3. TABLERO
+   ========================================================== */
+var ETAPAS = [
+ {id:"disenos", nombre:"Diseños epidemiológicos"},
+ {id:"medidas", nombre:"Medidas de asociación"},
+ {id:"sesgos",  nombre:"Sesgos y confusión"}
+];
+var PASOS_ETAPA = 6;   /* casillas por etapa */
+var META = 18;
+var PASO_A = 1;        /* cada parada corta */
+var PASO_B = 2;        /* cada acierto del reto de artículo */
+
+/* geometría del tablero */
+var NODOS = [70, 375, 680, 925];
+var YBASE = 128;
+
+/* ==========================================================
+   4. ESTADO
+   ========================================================== */
+var CLAVE = "ruta-epidemiologo-v2";
+var S;
+
+function estadoInicial(){
+  return {pos:0, tiradas:0, aciertos:0, fallos:0,
+    porBloque:{disenos:{ok:0,ko:0}, medidas:{ok:0,ko:0}, sesgos:{ok:0,ko:0}}, temasKO:{},
+    via:[null,null,null], retoHecho:[false,false,false],
+    usadas:[], usadasArt:[], preguntaActual:null, retoActual:null, terminado:false};
+}
+function guardar(){ try{ localStorage.setItem(CLAVE, JSON.stringify(S)); }catch(e){} }
+function cargar(){
+  try{ var b=localStorage.getItem(CLAVE); if(b){ var d=JSON.parse(b);
+    if(d && typeof d.pos==="number" && d.via && d.porBloque) return d; } }catch(e){}
+  return null;
+}
+function anotaTema(t){ if(!t) return; if(!S.temasKO) S.temasKO={}; S.temasKO[t]=(S.temasKO[t]||0)+1; }
+function etapaActual(){ return Math.min(ETAPAS.length-1, Math.floor(S.pos/PASOS_ETAPA)); }
+function pasosEnEtapa(){ return S.pos - etapaActual()*PASOS_ETAPA; }
+
+/* ==========================================================
+   5. DIBUJOS
+   ========================================================== */
+function figuraSinBata(){
+  return ''+
+  '<g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+
+  '<circle cx="22" cy="11" r="7.5"/>'+
+  '<path d="M15.2 7.6c2.4-3.4 11-3.6 13.4.6"/>'+           /* pelo */
+  '<path d="M22 18.5v3"/>'+
+  '<path d="M11 34c0-5 3.6-8.4 6.6-9.6L22 28l4.4-3.6C29.4 25.6 33 29 33 34l-.7 11h-20.6z"/>'+ /* camiseta */
+  '<path d="M11.3 30 7 38"/><path d="M32.7 30 37 38"/>'+   /* brazos */
+  '<path d="M16 45v11"/><path d="M28 45v11"/>'+            /* piernas */
+  '<path d="M17.6 24.4 22 28l4.4-3.6" />'+
+  '</g>'+
+  '<g style="stroke:var(--carmin)" stroke-width="1.7" fill="none" stroke-linecap="round">'+
+  '<path d="M37 38v6"/><rect x="33.4" y="36" width="7" height="9" rx="1"/>'+ /* cuaderno */
+  '</g>';
+}
+function figuraConBata(conTexto){
+  var w = conTexto ? 1.45 : 1.7;
+  var bordado = conTexto ?
+    '<text x="22" y="38.4" text-anchor="middle" font-family="Source Sans 3, sans-serif" font-size="2.2" '+
+    'letter-spacing="0.12" font-weight="700" style="fill:var(--carmin)" stroke="none">EPIDEMI\u00d3LOGO</text>' : '';
+  return ''+
+  '<g fill="none" stroke="currentColor" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round">'+
+  '<circle cx="22" cy="11" r="7.2"/>'+
+  '<path d="M15.4 7.8c2.3-3.3 10.6-3.5 13 .6"/>'+
+  '<path d="M22 18.2v2.6"/>'+
+  '<path d="M8.6 35c0-5.6 4-9.6 7.4-11L22 30l6-6c3.4 1.4 7.4 5.4 7.4 11l-.8 13H9.4z"/>'+
+  '<path d="M16 24 22 32.5 28 24"/>'+
+  '<path d="M22 32.5v2.6"/>'+
+  '<circle cx="22" cy="42.4" r="0.75"/><circle cx="22" cy="46.4" r="0.75"/>'+
+  '<path d="M8.9 32 5.4 40.6"/><path d="M35.1 32 38.6 40.6"/>'+
+  '<path d="M14.5 48v8"/><path d="M29.5 48v8"/>'+
+  '<rect x="25.2" y="41.6" width="7.4" height="5.6" rx="0.8"/>'+
+  '</g>'+
+  bordado+
+  '<g style="stroke:var(--carmin)" stroke-width="'+(w*0.85)+'" fill="none" stroke-linecap="round">'+
+  '<rect x="1.4" y="41" width="7.4" height="9" rx="1"/>'+
+  '<path d="M5.1 43.2v4.6"/><path d="M3 44h3.2"/><path d="M4 45.6h3"/><path d="M3.4 47.2h2.4"/>'+
+  '</g>';
+}
+
+function pintarTablero(){
+  var etapaAct = etapaActual();
+  var svg = '<svg viewBox="0 0 1000 230" role="img" aria-label="Tablero: tres etapas con dos sendas cada una">';
+
+  /* lanas */
+  for(var e=0;e<3;e++){
+    var x0=NODOS[e], x1=NODOS[e+1], xm=(x0+x1)/2;
+    var elegida = S.via[e];
+    var hecha = (S.pos >= (e+1)*PASOS_ETAPA);
+    var activa = (e===etapaAct && !S.terminado);
+    var dA = "M"+x0+" "+YBASE+" Q "+xm+" 34 "+x1+" "+YBASE;
+    var dB = "M"+x0+" "+YBASE+" Q "+xm+" 222 "+x1+" "+YBASE;
+
+    svg += lane(dA,"A",e,elegida,hecha,activa) + lane(dB,"B",e,elegida,hecha,activa);
+
+    /* paradas */
+    svg += '<g id="paradas-'+e+'"></g>';
+  }
+
+  /* nodos */
+  for(var n=0;n<NODOS.length;n++){
+    var alcanzado = S.pos >= n*PASOS_ETAPA;
+    svg += '<circle cx="'+NODOS[n]+'" cy="'+YBASE+'" r="7" style="fill:'+(alcanzado?"var(--carmin)":"var(--papel)")+
+           ';stroke:'+(alcanzado?"var(--carmin)":"var(--linea-fuerte)")+'" stroke-width="2"/>';
+    if(n>0 && n<3){
+      svg += '<text x="'+NODOS[n]+'" y="'+(YBASE+26)+'" text-anchor="middle" font-family="Source Sans 3, sans-serif" '+
+             'font-size="11" font-weight="700" letter-spacing="1.1" style="fill:var(--tinta-3)">ETAPA '+(n+1)+'</text>';
+    }
+  }
+  svg += '<text x="'+NODOS[0]+'" y="'+(YBASE+26)+'" text-anchor="middle" font-family="Source Sans 3, sans-serif" '+
+         'font-size="11" font-weight="700" letter-spacing="1.1" style="fill:var(--tinta-3)">SALIDA</text>';
+  svg += '<text x="'+NODOS[3]+'" y="'+(YBASE+26)+'" text-anchor="middle" font-family="Source Sans 3, sans-serif" '+
+         'font-size="11" font-weight="700" letter-spacing="1.1" style="fill:var(--carmin)">META</text>';
+
+  /* figura de meta (fantasma hasta llegar) */
+  svg += '<g id="metaFig" transform="translate(940,62) scale(1.12)" opacity="'+(S.pos>=META?"1":".3")+'" '+
+         'style="color:var(--tinta-2)">'+figuraConBata(false)+'</g>';
+
+  /* ficha del alumno */
+  svg += '<g id="fichaAlumno" style="color:var(--tinta)"></g>';
+  svg += '</svg>';
+  document.getElementById("tableroSvg").innerHTML = svg;
+
+  colocarParadas();
+  colocarFicha();
+
+  function lane(d, cual, e, elegida, hecha, activa){
+    var col = (cual==="A") ? "var(--indigo)" : "var(--carmin)";
+    var esta = (elegida===cual);
+    var op, w, dash;
+    if(elegida===null){ op = activa? .55 : .2; w=2; dash= (cual==="A")? "1 0" : "1 0"; }
+    else if(esta){ op = hecha? .75 : 1; w=3.2; dash="1 0"; }
+    else { op=.14; w=2; dash="5 6"; }
+    return '<path d="'+d+'" fill="none" style="stroke:'+col+'" stroke-width="'+w+'" opacity="'+op+
+           '" stroke-dasharray="'+dash+'" stroke-linecap="round"/>';
+  }
+}
+
+function puntoEn(e, cual, frac){
+  var x0=NODOS[e], x1=NODOS[e+1], xm=(x0+x1)/2, cy=(cual==="A")?34:222;
+  var t=frac, mt=1-t;
+  return {x: mt*mt*x0 + 2*mt*t*xm + t*t*x1, y: mt*mt*YBASE + 2*mt*t*cy + t*t*YBASE};
+}
+
+function colocarParadas(){
+  for(var e=0;e<3;e++){
+    var g=document.getElementById("paradas-"+e); if(!g) continue;
+    var elegida=S.via[e], html="";
+    var hecho=(S.pos-e*PASOS_ETAPA);
+    if(elegida===null || elegida==="A"){
+      for(var k=1;k<=6;k++){
+        var p=puntoEn(e,"A",k/6);
+        var pasado = hecho >= k*PASO_A;
+        html += '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3.4" style="fill:'+
+                (pasado?"var(--indigo)":"var(--papel)")+';stroke:var(--indigo)" stroke-width="2" opacity="'+
+                (elegida==="A"?1:.35)+'"/>';
+      }
+    }
+    if(elegida===null || elegida==="B"){
+      var pb=puntoEn(e,"B",.5);
+      html += '<g opacity="'+(elegida==="B"?1:.35)+'">'+
+        '<rect x="'+(pb.x-9)+'" y="'+(pb.y-11)+'" width="18" height="22" rx="2" style="fill:var(--papel);stroke:var(--carmin)" stroke-width="2"/>'+
+        '<path d="M'+(pb.x-4.5)+' '+(pb.y-5)+'h9M'+(pb.x-4.5)+' '+(pb.y-1)+'h9M'+(pb.x-4.5)+' '+(pb.y+3)+'h5" '+
+        'style="stroke:var(--carmin)" stroke-width="1.6" stroke-linecap="round" fill="none"/></g>';
+    }
+    g.innerHTML = html;
+  }
+}
+
+function colocarFicha(){
+  var g = document.getElementById("fichaAlumno"); if(!g) return;
+  var x, y;
+  if(S.pos >= META){ g.innerHTML=""; return; }               /* la figura de meta ya está a color */
+  var e = etapaActual(), via = S.via[e], pasos = pasosEnEtapa();
+  if(via===null){ x = NODOS[e]; y = YBASE; }
+  else { var p = puntoEn(e, via, pasos/PASOS_ETAPA); x=p.x; y=p.y; }
+  g.setAttribute("transform","translate("+(x-22*0.82)+","+(y-56*0.82-1)+") scale(0.82)");
+  g.innerHTML = figuraSinBata();
+}
+
+function pintarMarcador(){
+  var e=etapaActual();
+  document.getElementById("marcador").innerHTML =
+    t("Tiradas", S.tiradas) +
+    t("Casilla", S.pos+" / "+META) +
+    t("Etapa", S.terminado ? "Meta" : (e+1)+" · "+ETAPAS[e].nombre) +
+    t("Aciertos", S.aciertos) +
+    t("Fallos", S.fallos);
+  function t(rot,val){ return '<div><span class="rot">'+rot+'</span><span class="val">'+val+'</span></div>'; }
+}
+
+/* ==========================================================
+   6. SELECCIÓN DE CONTENIDO
+   ========================================================== */
+function elegirConcepto(bloque){
+  var pool=[], i;
+  for(i=0;i<PREGUNTAS.length;i++) if(PREGUNTAS[i].b===bloque && S.usadas.indexOf(i)<0) pool.push(i);
+  if(!pool.length){
+    S.usadas = S.usadas.filter(function(x){ return PREGUNTAS[x].b!==bloque; });
+    for(i=0;i<PREGUNTAS.length;i++) if(PREGUNTAS[i].b===bloque) pool.push(i);
+  }
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function elegirArtCorta(bloque){
+  var lista=ART_CORTAS[bloque], libres=[];
+  for(var i=0;i<lista.length;i++) if(S.usadasArt.indexOf(bloque+i)<0) libres.push(i);
+  if(!libres.length) libres=[0,1].slice(0,lista.length);
+  return libres[Math.floor(Math.random()*libres.length)];
+}
+
+/* ==========================================================
+   7. PANTALLAS
+   ========================================================== */
+var escena = document.getElementById("escena");
+
+function siguiente(){
+  if(S.pos>=META){ S.terminado=true; guardar(); pintarTablero(); pintarMarcador(); informe(); return; }
+  var e=etapaActual();
+  if(S.via[e]===null){ pantallaSendas(e); return; }
+  if(S.via[e]==="B" && !S.retoHecho[e]){ abrirReto(e); return; }
+  pantallaPregunta(e);
+}
+
+function pantallaSendas(e){
+  var nom = ETAPAS[e].nombre;
+  escena.innerHTML =
+   '<div class="tarjeta"><div class="tarjeta-cab">'+
+   '<span class="sello">Etapa '+(e+1)+' de 3</span><span class="avance">'+nom+' · 6 casillas hasta el siguiente nodo</span></div>'+
+   '<p class="enunciado" style="margin-bottom:14px">Elige por dónde cruzas esta etapa.</p>'+
+   '<div class="sendas">'+
+     '<button class="senda a" id="viaA"><span class="sub">Senda de preguntas cortas</span>'+
+       '<span class="tit">Seis paradas de una casilla</span>'+
+       '<span class="txt">Cinco preguntas breves de repaso, del nivel de la epidemiología de segundo, y en la última parada una pregunta sobre un artículo real. Mínimo seis tiradas.</span></button>'+
+     '<button class="senda b" id="viaB"><span class="sub">Senda del artículo</span>'+
+       '<span class="tit">Un salto de seis casillas</span>'+
+       '<span class="txt">Un estudio real y tres preguntas encadenadas sobre él, más exigentes. Una sola tirada, pero avanzas dos casillas por acierto: si fallas, terminas la etapa por la senda de preguntas cortas.</span></button>'+
+   '</div></div>';
+  document.getElementById("viaA").addEventListener("click", function(){ S.via[e]="A"; guardar(); pintarTablero(); siguiente(); });
+  document.getElementById("viaB").addEventListener("click", function(){ S.via[e]="B"; guardar(); pintarTablero(); siguiente(); });
+}
+
+function pantallaPregunta(e){
+  var bloque=ETAPAS[e].id, pasos=pasosEnEtapa();
+  var esArt = (pasos >= 5);   /* la última parada es siempre de artículo */
+  if(!S.preguntaActual){
+    S.preguntaActual = esArt
+      ? {tipo:"art", i:elegirArtCorta(bloque), bloque:bloque}
+      : {tipo:"con", i:elegirConcepto(bloque), bloque:bloque};
+    guardar();
+  }
+  var sel=S.preguntaActual;
+  var p = sel.tipo==="art" ? ART_CORTAS[bloque][sel.i] : PREGUNTAS[sel.i];
+  var html='<div class="tarjeta"><div class="tarjeta-cab">'+
+    '<span class="sello a">'+(sel.tipo==="art"?"Parada de artículo":"Pregunta corta")+'</span>'+
+    '<span class="avance">Senda de preguntas cortas · acertar avanza 1 casilla · fallar no retrocede</span></div>';
+  if(sel.tipo==="art") html += fichaHTML(FICHAS[p.ficha]);
+  html += '<p class="enunciado">'+p.q+'</p><div class="opciones" id="opciones">';
+  var L="ABCD";
+  for(var i=0;i<p.o.length;i++)
+    html += '<button class="opcion" data-i="'+i+'"><span class="letra">'+L[i]+'</span><span>'+p.o[i]+'</span></button>';
+  html += '</div><div id="tras"></div></div>';
+  escena.innerHTML=html;
+  enlazarOpciones(function(k){ responder(k,p,sel); });
+}
+
+function fichaHTML(f){
+  var h='<div class="ficha-art"><h4>Ficha del estudio</h4><p class="cita">'+f.titulo+'</p><ul>';
+  for(var i=0;i<f.datos.length;i++) h+='<li>'+f.datos[i]+'</li>';
+  return h+'</ul><p class="doi">'+f.doi+'</p></div>';
+}
+function enlazarOpciones(cb){
+  var bs=escena.querySelectorAll("#opciones .opcion");
+  for(var i=0;i<bs.length;i++)
+    bs[i].addEventListener("click", function(){ cb(parseInt(this.getAttribute("data-i"),10)); });
+}
+function marcarOpciones(elegida, correcta){
+  var bs=escena.querySelectorAll("#opciones .opcion");
+  for(var i=0;i<bs.length;i++){
+    bs[i].disabled=true;
+    if(i===correcta) bs[i].className="opcion buena";
+    else if(i===elegida) bs[i].className="opcion mala";
+  }
+}
+
+function responder(elegida,p,sel){
+  var e=etapaActual(), bloque=ETAPAS[e].id;
+  var ok=(elegida===p.c);
+  S.tiradas++;
+  if(sel.tipo==="art") S.usadasArt.push(bloque+sel.i); else S.usadas.push(sel.i);
+  if(ok){ S.aciertos++; S.porBloque[bloque].ok++; } else { S.fallos++; S.porBloque[bloque].ko++; anotaTema(p.t); }
+  marcarOpciones(elegida,p.c);
+
+  var destino = ok ? Math.min(META, S.pos+PASO_A) : S.pos;
+  var llegaNodo = (destino % PASOS_ETAPA === 0);
+  document.getElementById("tras").innerHTML =
+    '<div class="veredicto '+(ok?"ok":"ko")+'"><h3>'+
+    (ok ? "Correcto · avanzas 1 casilla" : "Incorrecto · sigues en la casilla "+S.pos)+
+    '</h3><p>'+p.e+'</p></div>'+
+    '<div class="acciones no-imprimir"><button class="btn" id="btnSeguir">'+
+    (destino>=META ? "Llegar a la meta" : (ok&&llegaNodo ? "Etapa superada · continuar" : "Siguiente tirada"))+'</button></div>';
+
+  S.pos=destino; S.preguntaActual=null;
+  guardar(); pintarTablero(); pintarMarcador();
+  var b=document.getElementById("btnSeguir");
+  b.addEventListener("click", siguiente); b.focus();
+}
+
+/* ---------- senda del artículo ---------- */
+function abrirReto(e){
+  if(!S.retoActual){ S.retoActual={e:e, paso:0, aciertos:0}; guardar(); }
+  pintarReto();
+}
+function pintarReto(){
+  var st=S.retoActual, bloque=ETAPAS[st.e].id, reto=RETOS[bloque];
+  var f=FICHAS[reto.ficha], sub=reto.subs[st.paso];
+  var html='<div class="tarjeta"><div class="tarjeta-cab">'+
+    '<span class="sello b">Senda del artículo</span>'+
+    '<span class="avance">Tres preguntas · avanzas 2 casillas por acierto · una sola tirada</span></div>'+
+    fichaHTML(f)+
+    '<p class="paso-reto">Pregunta '+(st.paso+1)+' de 3 · aciertos hasta ahora: '+st.aciertos+'</p>'+
+    '<p class="enunciado">'+sub.q+'</p><div class="opciones" id="opciones">';
+  var L="ABCD";
+  for(var i=0;i<sub.o.length;i++)
+    html += '<button class="opcion" data-i="'+i+'"><span class="letra">'+L[i]+'</span><span>'+sub.o[i]+'</span></button>';
+  html += '</div><div id="tras"></div></div>';
+  escena.innerHTML=html;
+  enlazarOpciones(responderReto);
+}
+function responderReto(elegida){
+  var st=S.retoActual, bloque=ETAPAS[st.e].id, reto=RETOS[bloque], sub=reto.subs[st.paso];
+  var ok=(elegida===sub.c);
+  if(ok){ st.aciertos++; S.porBloque[bloque].ok++; } else { S.porBloque[bloque].ko++; anotaTema(sub.t); }
+  marcarOpciones(elegida,sub.c);
+  var ultimo=(st.paso===reto.subs.length-1);
+  var txt='<div class="veredicto '+(ok?"ok":"ko")+'"><h3>'+(ok?"Correcto":"Incorrecto")+'</h3><p>'+sub.e+'</p></div>';
+
+  if(!ultimo){
+    txt+='<div class="acciones no-imprimir"><button class="btn" id="btnSeguir">Siguiente pregunta</button></div>';
+    document.getElementById("tras").innerHTML=txt;
+    guardar();
+    document.getElementById("btnSeguir").addEventListener("click", function(){
+      S.retoActual.paso++; guardar(); pintarReto();
+    });
+    document.getElementById("btnSeguir").focus();
+    return;
+  }
+
+  var avance = st.aciertos*PASO_B;
+  S.tiradas++;
+  if(st.aciertos===3) S.aciertos++; else S.fallos++;
+  S.retoHecho[st.e]=true;
+  S.pos = Math.min(META, S.pos+avance);
+  var completa = (S.pos % PASOS_ETAPA === 0);
+  if(!completa) S.via[st.e]="A";   /* termina la etapa a pie */
+
+  txt += '<div class="veredicto '+(st.aciertos===3?"ok":"ko")+'"><h3>'+
+    (st.aciertos===3 ? "Salto completo · seis casillas" : "Salto parcial · "+avance+" casillas")+'</h3><p>'+
+    (st.aciertos===3
+      ? "Tres de tres sobre un estudio real: diseño, medida y amenaza a la validez. Etapa cerrada en una sola tirada."
+      : st.aciertos+" de 3. Avanzas "+avance+" casilla"+(avance===1?"":"s")+
+        " y terminas la etapa por la senda de preguntas cortas.")+'</p></div>'+
+    '<div class="acciones no-imprimir"><button class="btn" id="btnFin">'+
+    (S.pos>=META ? "Llegar a la meta" : "Continuar")+'</button></div>';
+  document.getElementById("tras").innerHTML=txt;
+
+  S.retoActual=null; S.preguntaActual=null;
+  guardar(); pintarTablero(); pintarMarcador();
+  var b=document.getElementById("btnFin");
+  b.addEventListener("click", siguiente); b.focus();
+}
+
+/* ==========================================================
+   8. INFORME
+   ========================================================== */
+function codigo(){
+  function d2(n){ n=Math.min(99,n); return (n<10?"0":"")+n; }
+  var ruta = S.via.map(function(v){ return v||"-"; }).join("");
+  var cuerpo = d2(S.tiradas)+d2(S.aciertos)+d2(S.fallos);
+  var suma=0, todo=cuerpo+ruta;
+  for(var i=0;i<todo.length;i++) suma += todo.charCodeAt(i)*(i+1);
+  return "EPI-"+cuerpo.slice(0,2)+"-"+cuerpo.slice(2,4)+"-"+cuerpo.slice(4,6)+"-"+ruta+
+         "-"+"BCDFGHJKLMNPQRSTVWXYZ".charAt(suma%21);
+}
+
+function bloqueRepaso(){
+  var ko = S.temasKO || {}, claves = [], k;
+  for(k in ko) if(Object.prototype.hasOwnProperty.call(ko,k) && TEMAS[k] && ko[k]>0) claves.push(k);
+  claves.sort(function(a,b){ return ko[b]-ko[a]; });
+  if(!claves.length){
+    return '<div class="repaso limpio"><h3>Nada que repasar</h3>'+
+      '<p>No has fallado ninguna pregunta: llegas al taller con los conceptos b\u00e1sicos en su sitio.</p></div>';
+  }
+  var h = '<div class="repaso"><h3>Qu\u00e9 conviene repasar, por orden</h3><ol>';
+  for(var i=0;i<claves.length;i++){
+    var t = TEMAS[claves[i]], n = ko[claves[i]];
+    h += '<li><strong>'+t.n+'</strong><span class="cuenta">'+n+(n===1?' fallo':' fallos')+'</span>'+
+         '<p>'+t.c+'</p></li>';
+  }
+  return h+'</ol></div>';
+}
+
+function informe(){
+  var b=S.porBloque;
+  var extra=S.tiradas-3;
+  var comentario;
+  if(S.fallos===0 && S.tiradas===3) comentario="Tres tiradas y ningún fallo: has cruzado las tres etapas por la senda del artículo sin equivocarte. No hay nada que repasar.";
+  else if(S.fallos===0) comentario="Ruta sin un solo fallo. El repaso lo tienes hecho.";
+  else if(extra<=4) comentario="Muy pocas tiradas de más. Los conceptos están sólidos y los tropiezos son puntuales.";
+  else if(extra<=10) comentario="Repaso razonable, con fallos concentrados. Mira en qué bloque se acumulan antes del taller.";
+  else comentario="Has necesitado bastantes intentos. Vuelve sobre el bloque con más fallos: el taller da por sabido este material.";
+
+  escena.innerHTML =
+   '<div class="tarjeta informe">'+
+   '<div class="diploma"><svg viewBox="0 0 44 60" style="color:var(--tinta)" aria-label="Estudiante con bata de epidemiólogo">'+
+     figuraConBata(true)+'</svg>'+
+     '<div style="flex:1;min-width:240px"><h2>Has llegado a la meta</h2>'+
+     '<div class="barra-roja" style="margin:8px 0 12px"></div>'+
+     '<p class="entradilla" style="font-size:17px;margin:0">'+comentario+'</p></div></div>'+
+   '<table class="resumen-tabla"><thead><tr><th>Etapa</th><th>Senda</th><th class="num">Aciertos</th><th class="num">Fallos</th></tr></thead><tbody>'+
+   fila("Diseños epidemiológicos",0,b.disenos)+
+   fila("Medidas de asociación",1,b.medidas)+
+   fila("Sesgos y confusión",2,b.sesgos)+
+   '<tr><td><strong>Total</strong></td><td>'+S.tiradas+' tiradas</td><td class="num"><strong>'+S.aciertos+'</strong></td><td class="num"><strong>'+S.fallos+'</strong></td></tr>'+
+   '</tbody></table>'+
+   bloqueRepaso()+
+   '<p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta-3);font-weight:700;margin:22px 0 0">Código de ruta</p>'+
+   '<div class="codigo">'+codigo()+'</div>'+
+   '<p class="fuente">El código recoge tiradas, aciertos, fallos y las sendas elegidas en cada etapa. Es lo único que hay que entregar.</p>'+
+   '<div class="acciones no-imprimir"><button class="btn" id="btnImprimir">Imprimir o guardar en PDF</button>'+
+   '<button class="btn fantasma" id="btnOtra">Jugar otra ruta</button></div></div>';
+
+  function fila(nombre,i,d){
+    var v = S.via[i]==="B" ? "Del artículo" : (S.via[i]==="A" ? "Preguntas cortas" : "—");
+    return '<tr><td>'+nombre+'</td><td>'+v+'</td><td class="num">'+d.ok+'</td><td class="num">'+d.ko+'</td></tr>';
+  }
+  document.getElementById("btnImprimir").addEventListener("click", function(){ window.print(); });
+  document.getElementById("btnOtra").addEventListener("click", reiniciar);
+}
+
+/* ==========================================================
+   9. ARRANQUE
+   ========================================================== */
+function reiniciar(){
+  S=estadoInicial(); guardar();
+  pintarTablero(); pintarMarcador(); siguiente();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.getElementById("btnReiniciar").addEventListener("click", reiniciar);
+
+S = cargar() || estadoInicial();
+pintarTablero();
+pintarMarcador();
+if(S.terminado && S.pos>=META) informe();
+else if(S.retoActual) pintarReto();
+else siguiente();
+
+})();
+</script>
+
+</body>
+</html>
